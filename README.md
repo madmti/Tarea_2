@@ -28,13 +28,32 @@ Para detener los servicios
 sudo make down
 ```
 
-## Rutas y Endpoints
-### API
-| Método | Endpoint                               | Descripción                     |
-|--------|----------------------------------------|---------------------------------|
-| GET    |[/api/](http://localhost:8080/api/users)| Entrada Test                    |
+## Endpoints
+### GET /api/public/articulos
+**Query Parameters:**
 
-### FRONTEND
-| Página           | URL                       | Descripción                       |
-|------------------|---------------------------|-----------------------------------|
-| Inicio           |[/](http://localhost:8080/)| Página principal de la aplicación |
+- `autor`: ID del autor (int, opcional)
+- `fecha_ini`: Fecha inicial (opcional)
+- `fecha_fin`: Fecha final (opcional)
+- `categoria`: ID de la categoría (int, opcional)
+- `revisor`: ID del revisor (int, opcional)
+- `titulo`: Título del artículo (string, opcional)
+
+**Respuesta:**
+```json
+{
+    total: 238,
+    articulos: [
+        {
+            titulo: "Como analizar Software y Hardware",
+            resumen: "Cumque excepturi...",
+            fecha_envio: "2005-08-08",
+            topicos: "Gestion de proyectos, Redes y ..."
+        },
+        ...
+    ]
+}
+```
+
+
+## Rutas FRONTEND

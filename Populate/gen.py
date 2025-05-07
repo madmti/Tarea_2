@@ -31,7 +31,7 @@ class DataGenerator(AutoInit):
         super().__init__(**kwargs)
 
     def __generate_categorias(self) -> None:
-        self.__data['categorias'] = [Categoria(i, nombre) for i, nombre in enumerate(CATEGORIAS)]
+        self.__data['categorias'] = [Categoria(i, nombre) for i, nombre in enumerate(CATEGORIAS, start=1)]
 
     def __generate_articulos(self) -> None:
         self.__data['articulos'] = [
@@ -41,16 +41,16 @@ class DataGenerator(AutoInit):
                 resumen=FieldGenerator.generate_resumen(),
                 fecha_envio=FieldGenerator.generate_fecha(),
                 aprobado= None,
-            ) for i in range(self.n_articulos)
+            ) for i in range(1, self.n_articulos + 1)
         ]
 
     def __generate_administradores(self) -> None:
-        for i in range(self.n_administradores):
+        for i in range(1, self.n_administradores + 1):
             rut = FieldGenerator.generate_rut()
             nombre = FieldGenerator.generate_unique_nombre()
             email = FieldGenerator.generate_email(nombre, rut)
             self.__data['administradores'].append(Administrador(
-                id_administrador=self.current_users,
+                id_administrador=self.current_users + 1,
                 rut=rut,
                 nombre=nombre,
                 email=email,
@@ -59,12 +59,12 @@ class DataGenerator(AutoInit):
             self.current_users += 1
 
     def __generate_autores(self) -> None:
-        for i in range(self.n_autores):
+        for i in range(1, self.n_autores + 1):
             rut = FieldGenerator.generate_rut()
             nombre = FieldGenerator.generate_unique_nombre()
             email = FieldGenerator.generate_email(nombre, rut)
             self.__data['autores'].append(Autor(
-                id_autor=self.current_users,
+                id_autor=self.current_users + 1,
                 rut=rut,
                 nombre=nombre,
                 email=email,
@@ -73,12 +73,12 @@ class DataGenerator(AutoInit):
             self.current_users += 1
 
     def __generate_revisores(self) -> None:
-        for i in range(self.n_revisores):
+        for i in range(1, self.n_revisores + 1):
             rut = FieldGenerator.generate_rut()
             nombre = FieldGenerator.generate_unique_nombre()
             email = FieldGenerator.generate_email(nombre, rut)
             self.__data['revisores'].append(Revisor(
-                id_revisor=self.current_users,
+                id_revisor=self.current_users + 1,
                 rut=rut,
                 nombre=nombre,
                 email=email,
@@ -89,7 +89,7 @@ class DataGenerator(AutoInit):
     def __generate_topicos(self) -> None:
         for articulo in self.__data['articulos']:
             n_topicos = random.randint(1, 3)
-            topicos = random.sample(range(self.n_categorias), n_topicos)
+            topicos = random.sample(range(1, self.n_categorias + 1), n_topicos)
             for topico in topicos:
                 self.__data['topicos'].append(Topico(
                     id_categoria=topico,
@@ -99,7 +99,7 @@ class DataGenerator(AutoInit):
     def __generate_especialidades(self) -> None:
         for revisor in self.__data['revisores']:
             n_especialidades = random.randint(1, 3)
-            especialidades = random.sample(range(self.n_categorias), n_especialidades)
+            especialidades = random.sample(range(1, self.n_categorias + 1), n_especialidades)
             for especialidad in especialidades:
                 self.__data['especialidades'].append(Especialidad(
                     id_categoria=especialidad,
@@ -110,7 +110,7 @@ class DataGenerator(AutoInit):
         for articulo in self.__data['articulos']:
             n_dueños = random.randint(1, 3)
             dueños = random.sample(self.__data['autores'], n_dueños)
-            for i, dueño in enumerate(dueños):
+            for i, dueño in enumerate(dueños, start=1):
                 self.__data['propiedades'].append(Propiedad(
                     id_articulo=articulo.get('id_articulo'),
                     id_autor=dueño.get('id_usuario'),
@@ -151,7 +151,7 @@ class DataGenerator(AutoInit):
                 seleccionados = random.sample(revisores_disponibles, min(3, len(revisores_disponibles)))
 
                 for revisor in seleccionados:
-                    estado = random.choice([True, False, None])
+                    estado = random.choices([True, False, None], weights=[90, 5, 5], k=1)[0]
                     calidad_tecnica = None if estado is None else FieldGenerator.generate_calificacion()
                     originalidad = None if estado is None else FieldGenerator.generate_calificacion()
                     valoracion_global = None if estado is None else FieldGenerator.generate_calificacion()
