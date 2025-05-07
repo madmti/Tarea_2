@@ -8,7 +8,7 @@ services:
       - ./CSS:/var/www/html/public/css
       - ./JS:/var/www/html/public/js
       - ./PHP:/var/php
-      - ./PHP/public:/var/www/html/public
+      - ./PHP/index.php:/var/www/html/public/index.php
       - ./Views:/var/views
     command: php -S 0.0.0.0:8080 -t public
     depends_on:

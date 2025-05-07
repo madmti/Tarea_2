@@ -1,5 +1,4 @@
 DELIMITER $$
-
 CREATE PROCEDURE filtrar_articulos (
     IN p_id_autor INT,
     IN p_fecha_inicio DATE,
@@ -28,5 +27,17 @@ BEGIN
         AND (p_titulo IS NULL OR a.titulo LIKE CONCAT('%', p_titulo, '%'))
     GROUP BY a.id_articulo;
 END$$
+DELIMITER ;
 
+DELIMITER $$
+CREATE PROCEDURE insertar_articulo(
+    IN p_titulo VARCHAR(50),
+    IN p_resumen VARCHAR(150),
+    OUT p_id_articulo INT
+)
+BEGIN
+    INSERT INTO articulo (titulo, resumen, fecha_envio, aprobado)
+    VALUES (p_titulo, p_resumen, DATE_ADD(CURDATE(), INTERVAL 3 MONTH), NULL);
+    SET p_id_articulo = LAST_INSERT_ID();
+END$$
 DELIMITER ;

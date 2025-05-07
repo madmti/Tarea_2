@@ -29,6 +29,12 @@ sudo make down
 ```
 
 ## Endpoints
+Para todos los endpoints en caso de fallo se entrega la siguiente respuesta, junto al codigo de error correspondiente:
+```json
+{
+    "message": "Mensaje describiendo el error.."
+}
+```
 ### GET /api/public/articulos
 **Query Parameters:**
 
@@ -42,6 +48,7 @@ sudo make down
 **Respuesta:**
 ```json
 {
+    message: "Artículos obtenidos exitosamente.",
     total: 238,
     articulos: [
         {
@@ -55,5 +62,19 @@ sudo make down
 }
 ```
 
+### POST /api/public/articulos
+**Body Parameters:**
+- `titulo`: Titulo del articulo
+- `resumen`: Resumen del articulo
+- `topicos`: array de las IDs de los topicos
+- `autores`: array de las IDs de los autores (el primer autor es de contacto)
+
+**Respuesta:**
+```json
+{
+    message: "Artículo creado exitosamente.",
+    id_articulo: 41
+}
+```
 
 ## Rutas FRONTEND
