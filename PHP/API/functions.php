@@ -62,6 +62,46 @@ class Functions {
         }
     }
     /**
+     * Registrar un usuario autor.
+     * Data: rut, email, nombre, contrasena, tipo
+     */
+    public static function registrarUsuarioAutor(\PDO $pdo, array $data): ?int {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO usuario (rut, email, nombre, contrasena, tipo) VALUES (:rut, :email, :nombre, :contrasena, :tipo)");
+            $stmt->execute([
+                'rut' => $data['rut'],
+                'email' => $data['email'],
+                'nombre' => $data['nombre'],
+                'contrasena' => password_hash($data['contrasena'], PASSWORD_BCRYPT),
+                'tipo' => 'AUT',
+            ]);
+            return (int) $pdo->lastInsertId();
+        } catch (\PDOException $e) {
+            error_log("Error al registrar usuario: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Registrar un usuario cualquiera.
+     * Data: rut, email, nombre, contrasena, tipo
+     */
+    public static function registrarUsuario(\PDO $pdo, array $data): ?int {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO usuario (rut, email, nombre, contrasena, tipo) VALUES (:rut, :email, :nombre, :contrasena, :tipo)");
+            $stmt->execute([
+                'rut' => $data['rut'],
+                'email' => $data['email'],
+                'nombre' => $data['nombre'],
+                'contrasena' => password_hash($data['contrasena'], PASSWORD_BCRYPT),
+                'tipo' => $data['tipo'],
+            ]);
+            return (int) $pdo->lastInsertId();
+        } catch (\PDOException $e) {
+            error_log("Error al registrar usuario: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
      * ================================================================
      *                              READ
      * ================================================================
@@ -87,4 +127,71 @@ class Functions {
             return null;
         }
     }
+    /**
+     * ================================================================
+     *                              UPDATE
+     * ================================================================
+     */
+    /**
+     * Data: titulo, resumen.
+     */
+    public static function actualizarArticulo(\PDO $pdo, int $idArticulo, array $data): bool {
+        try {
+            $stmt = $pdo->prepare("UPDATE articulo SET titulo = :titulo, resumen = :resumen WHERE id_articulo = :id_articulo");
+            $stmt->execute([
+                'titulo' => $data['titulo'],
+                'resumen' => $data['resumen'],
+                'id_articulo' => $idArticulo
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar artículo: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * ================================================================
+     *                              DELETE
+     * ================================================================
+     */
+    /**
+     * Eliminar un artículo por su ID.
+     */
+    public static function eliminarArticulo(\PDO $pdo, int $idArticulo): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM articulo WHERE id_articulo = :id_articulo");
+            $stmt->execute([
+                'id_articulo' => $idArticulo
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al eliminar artículo: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * ================================================================
+     *                             MISC
+     * ================================================================
+     */
+    /**
+     * Login de usuario cualquiera.
+     * Devuelve un token si las credenciales son correctas.
+     */
+    public static function loginUsuario(\PDO $pdo, string $email, string $contrasena): ?string {
+        try {
+            $stmt = $pdo->prepare("SELECT id_usuario, contrasena, tipo FROM usuario WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+    
+            if ($user && password_verify($contrasena, $user['contrasena'])) {
+                return JwtHelper::generarToken((int)$user['id_usuario'], $user['tipo']);
+            }
+            return null;
+        } catch (\PDOException $e) {
+            error_log("Error al iniciar sesión: " . $e->getMessage());
+            return null;
+        }
+    }
+
 }

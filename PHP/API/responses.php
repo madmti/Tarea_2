@@ -1,8 +1,8 @@
 <?php
 
 namespace API;
-
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Psr7\Factory\ResponseFactory;
 
 class ResponseHelper {
     public static function json(Response $response, array $data, int $statusCode = 200): Response {
@@ -26,5 +26,11 @@ class ResponseHelper {
         return $response
             ->withHeader('Location', $url)
             ->withStatus($statusCode);
+    }
+
+    public static function r_error(string $message, int $status = 400): Response {
+        $factory = new ResponseFactory();
+        $response = $factory->createResponse();
+        return self::error($response, $message, $status);
     }
 }

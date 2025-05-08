@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     rut CHAR(10) UNIQUE NOT NULL,
     email VARCHAR(95) UNIQUE NOT NULL,
     nombre VARCHAR(85) UNIQUE NOT NULL,
-    contrasena VARCHAR(30) NOT NULL,
+    contrasena VARCHAR(60) NOT NULL,-- CAMBIO 30 -> 60
     tipo CHAR(3) NOT NULL,
     CHECK (tipo IN ('AUT', 'REV', 'ADM'))
 );
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS propiedad (
     id_autor INT,
     es_contacto BOOLEAN NOT NULL,
     PRIMARY KEY (id_articulo, id_autor),
-    FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo),
+    FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo) ON DELETE CASCADE,    -- Si se elimina un artículo, se eliminan las propiedades asociadas
     FOREIGN KEY (id_autor) REFERENCES usuario(id_usuario) ON DELETE RESTRICT         -- No se pueden eliminar autores con artículos asignados
 );
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS revision (
 
     PRIMARY KEY (id_articulo, id_revisor),
 
-    FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo),
+    FOREIGN KEY (id_articulo) REFERENCES articulo(id_articulo) ON DELETE CASCADE,    -- Si se elimina un artículo, se eliminan las revisiones asociadas
     FOREIGN KEY (id_revisor) REFERENCES usuario(id_usuario) ON DELETE RESTRICT,      -- No se pueden eliminar revisores con revisiones asignadas
 
     CONSTRAINT todo_o_nada

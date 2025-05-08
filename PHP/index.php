@@ -1,9 +1,11 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
+require_once '/var/php/API/middleware.php';
 
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
 use DI\Container;
+use API\AuthMiddleware;
 
 $container = new Container();
 $container->set('db', function () {
@@ -23,6 +25,10 @@ $container->set('db', function () {
 
 AppFactory::setContainer($container);
 $app = AppFactory::create();
+$app->addRoutingMiddleware();
+$app->addErrorMiddleware(true, true, true);
+$app->add(new AuthMiddleware());
+$app->addBodyParsingMiddleware();
 
 $front_routes = require '/var/php/views.php';
 $front_routes($app);
