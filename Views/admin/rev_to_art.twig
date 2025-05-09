@@ -1,0 +1,43 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+
+        <!-- Info del revisor -->
+        <div class="box">
+            <h1 class="title">{{ revisor.nombre|e }}</h1>
+            <p><strong>Email:</strong> {{ revisor.email|e }}</p>
+            <p><strong>Especialidades:</strong> 
+                {% for especialidad in revisor.especialidades %}
+                    <span class="tag is-info">{{ especialidad.nombre_categoria }}</span>
+                {% endfor %}
+            </p>
+        </div>
+
+        <!-- Tabla de artículos sugeridos -->
+        <h2 class="subtitle">Artículos sugeridos según especialidad</h2>
+        <table class="table is-fullwidth is-bordered is-striped">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Tópicos</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for art in articulos %}
+                    <tr>
+                        <!-- Info de los articulos + boton de asignar -->
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="has-text-centered">No hay artículos disponibles para este revisor.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</section>
+{% endblock %}

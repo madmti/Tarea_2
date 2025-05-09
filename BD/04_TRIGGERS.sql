@@ -73,6 +73,8 @@ END$$
 
 DELIMITER ;
 
+-- TODO calcular_aprobado_delete !!!!!!!!!!!!!!!!!!!!!!!!!!!!!<------------------------------------
+
 -- TRIIGER para verificar que el revisor no sea autor del articulo
 
 DELIMITER $$

@@ -31,3 +31,24 @@ body, html {
         opacity: 0;
     }
 }
+
+tr.separador-top {
+    border-top: 3px solid #363636;
+    border-left: 3px solid #363636;
+    border-right: 3px solid #363636;
+}
+
+tr.separador-bottom {
+    border-bottom: 3px solid #363636;
+    border-left: 3px solid #363636;
+    border-right: 3px solid #363636;
+}
+
+tr.separador {
+    border-left: 3px solid #363636;
+    border-right: 3px solid #363636;
+}
+
+th {
+    border: 3px solid #363636 !important;
+}

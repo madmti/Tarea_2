@@ -1,4 +1,15 @@
-{% if user and user.es_propietario %}
-<a class="navbar-item" href="/protected/mis_articulos">Mis articulos</a>
-{% endif %}
-<a class="navbar-item" href="/protected/publicar">Publicar</a>
+<a class="navbar-item" href="/private/revisores">Revisores</a>
+<div class="navbar-item has-dropdown is-hoverable">
+    <a class="navbar-link">
+        Asignaciones
+    </a>
+
+    <div class="navbar-dropdown">
+        <a class="navbar-item" href="/private/asignaciones/articulos">
+            Por Artículo
+        </a>
+        <a class="navbar-item" href="/private/asignaciones/revisores">
+            Por Revisor
+        </a>
+    </div>
+</div>

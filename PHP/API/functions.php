@@ -151,7 +151,25 @@ class Functions {
             return false;
         }
     }
-    
+    /**
+     * Insertar especialidades para un usuario.
+     * Data: array de IDs de especialidades.
+     */
+    public static function insertarEspecialidades(\PDO $pdo, int $idUsuario, array $especialidades): bool {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO especialidad (id_revisor, id_categoria) VALUES (:id_revisor, :id_categoria)");
+            foreach ($especialidades as $especialidad) {
+                $stmt->execute([
+                    'id_revisor' => $idUsuario,
+                    'id_categoria' => $especialidad
+                ]);
+            }
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al insertar especialidades: " . $e->getMessage());
+            return false;
+        }
+    }
      /* ================================================================
      *                              READ
      * ================================================================
@@ -318,6 +336,67 @@ class Functions {
         }
     }
     /**
+     * Obtener todos los revisores con sus especialidades.
+     */
+    public static function obtenerRevisoresEspecialidad(\PDO $pdo): ?array {
+        try {
+            $stmt = $pdo->query("SELECT * FROM revisores_especialidades");
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener revisores con especialidades: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener un revisor con su especialidad por ID de revisor.
+     */
+    public static function obtenerRevisorEspecialidad(\PDO $pdo, int $idRevisor): ?array {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM revisores_especialidades WHERE id_usuario = :id_revisor");
+            $stmt->execute(['id_revisor' => $idRevisor]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener revisor con especialidad: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener artículos con sus autores, tópicos y revisores.
+     */
+    public static function obtenerArticulosAutoresTopicosRevisores(\PDO $pdo): ?array {
+        try {
+            $stmt = $pdo->query("SELECT * FROM articulos_autores_topicos_revisores");
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener artículos con autores, tópicos y revisores: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener revisores asociados a artículos.
+     */
+    public static function obtenerRevisoresTopicosArticulos(\PDO $pdo): ?array {
+        try {
+            $stmt = $pdo->query("SELECT * FROM revisores_topicos_articulos");
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener revisores asociados a artículos: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener todos los artículos.
+     */
+    public static function obtenerArticulosAsignacionIncompleta(\PDO $pdo): ?array {
+        try {
+            $stmt = $pdo->query("SELECT * FROM articulos_asignacion_incompleta");
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener artículos: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
      * ================================================================
      *                              UPDATE
      * ================================================================
@@ -427,6 +506,28 @@ class Functions {
         }
     }
     /**
+     * Actualizar especialidades de un revisor.
+     * Data: array de IDs de especialidades.
+     */
+    public static function actualizarEspecialidades(\PDO $pdo, int $idUsuario, array $especialidades): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM especialidad WHERE id_revisor = :id_revisor");
+            $stmt->execute(['id_revisor' => $idUsuario]);
+
+            $stmt = $pdo->prepare("INSERT INTO especialidad (id_categoria, id_revisor) VALUES (:id_categoria, :id_revisor)");
+            foreach ($especialidades as $especialidad) {
+                $stmt->execute([
+                    'id_categoria' => $especialidad,
+                    'id_revisor' => $idUsuario
+                ]);
+            }
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar especialidades: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
      * ================================================================
      *                              DELETE
      * ================================================================
@@ -443,6 +544,37 @@ class Functions {
             return true;
         } catch (\PDOException $e) {
             error_log("Error al eliminar artículo: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Eliminar un usuario por su ID.
+     */
+    public static function eliminarUsuario(\PDO $pdo, int $idUsuario): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM usuario WHERE id_usuario = :id_usuario");
+            $stmt->execute([
+                'id_usuario' => $idUsuario
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al eliminar usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Quitar la asignación de un revisor a un artículo.
+     */
+    public static function quitarAsignacion(\PDO $pdo, int $idArticulo, int $idRevisor): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM revision WHERE id_articulo = :id_articulo AND id_revisor = :id_revisor");
+            $stmt->execute([
+                'id_articulo' => $idArticulo,
+                'id_revisor' => $idRevisor
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al quitar asignación: " . $e->getMessage());
             return false;
         }
     }
@@ -521,5 +653,73 @@ class Functions {
             error_log("Error al asignar revisores: " . $e->getMessage());
             return false;
         }
+    }
+    public static function agruparRevisoresEspecialidad(array $revisores): array {
+        $revisoresEspecialidad = [];
+        foreach ($revisores as $revisor) {
+            if (!isset($revisoresEspecialidad[$revisor['id_usuario']])) {
+                $revisoresEspecialidad[$revisor['id_usuario']] = $revisor;
+                $revisoresEspecialidad[$revisor['id_usuario']]['especialidades'] = [];
+            }
+            $revisoresEspecialidad[$revisor['id_usuario']]['especialidades'][] = [
+                'id_categoria' => $revisor['id_categoria'],
+                'nombre_categoria' => $revisor['nombre_categoria']
+            ];
+        }
+        return $revisoresEspecialidad;
+    }
+    public static function agruparArticulosAutoresTopicosRevisores(array $articulos): array {
+        $articulosAgrupados = [];
+        foreach ($articulos as $articulo) {
+            $id = $articulo['id_articulo'];
+            if (!isset($articulosAgrupados[$id])) {
+                $articulosAgrupados[$id] = [
+                    'id_articulo' => $id,
+                    'titulo' => $articulo['titulo'],
+                    'autores' => [],
+                    'topicos' => [],
+                    'revisores' => []
+                ];
+            }
+            if (!in_array($articulo['nombre_autor'], $articulosAgrupados[$id]['autores'], true)) {
+                $articulosAgrupados[$id]['autores'][] = $articulo['nombre_autor'];
+            }
+            if (!in_array($articulo['nombre_categoria'], $articulosAgrupados[$id]['topicos'], true)) {
+                $articulosAgrupados[$id]['topicos'][] = $articulo['nombre_categoria'];
+            }
+            if (!empty($articulo['id_usuario']) && !array_key_exists($articulo['id_usuario'], array_column($articulosAgrupados[$id]['revisores'], null, 'id_usuario'))) {
+                $articulosAgrupados[$id]['revisores'][] = [
+                    'id_usuario' => $articulo['id_usuario'],
+                    'nombre_revisor' => $articulo['nombre_revisor']
+                ];
+            }
+        }    
+        return array_values($articulosAgrupados);
+    }
+    
+    public static function agruparRevisoresTopicosArticulos(array $revisores): array {
+        $revisoresAgrupados = [];
+        foreach ($revisores as $revisor) {
+            if (!isset($revisoresAgrupados[$revisor['id_usuario']])) {
+                $revisoresAgrupados[$revisor['id_usuario']] = [
+                    'id_usuario' => $revisor['id_usuario'],
+                    'nombre' => $revisor['nombre'],
+                    'articulos' => [],
+                    'topicos' => []
+                ];
+            }
+            if (!in_array($revisor['nombre_especialidad'], $revisoresAgrupados[$revisor['id_usuario']]['topicos'])) {
+                $revisoresAgrupados[$revisor['id_usuario']]['topicos'][] = $revisor['nombre_especialidad'];
+            }
+            $articulo = [
+                'id_articulo' => $revisor['id_articulo'],
+                'titulo' => $revisor['titulo'],
+                'estado' => $revisor['estado'],
+            ];
+            if (!in_array($articulo, $revisoresAgrupados[$revisor['id_usuario']]['articulos'])) {
+                $revisoresAgrupados[$revisor['id_usuario']]['articulos'][] = $articulo;
+            }
+        }
+        return array_values($revisoresAgrupados);
     }
 }

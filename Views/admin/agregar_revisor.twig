@@ -1,0 +1,64 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Alta de Revisor</h1>
+
+        <form method="POST" action="/private/revisores/nuevo">
+
+            <!-- Nombre -->
+            <div class="field">
+                <label class="label">Nombre</label>
+                <div class="control">
+                    <input class="input" type="text" name="nombre" required maxlength="85" placeholder="Nombre completo del revisor">
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+                <label class="label">Email</label>
+                <div class="control">
+                    <input class="input" type="email" name="email" required maxlength="95" placeholder="Correo electrónico">
+                </div>
+            </div>
+
+            <!-- RUT -->
+            <div class="field">
+                <label class="label">RUT</label>
+                <div class="control">
+                    <input class="input" type="text" name="rut" required maxlength="10" placeholder="Ej: 12345678-9">
+                </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="field">
+                <label class="label">Contraseña</label>
+                <div class="control">
+                    <input class="input" type="password" name="contrasena" required maxlength="30" placeholder="Contraseña">
+                </div>
+            </div>
+
+            <!-- Especialidades -->
+            <div class="field">
+                <label class="label">Tópicos de especialidad</label>
+                <div class="control">
+                    {% for cat in categorias %}
+                        <label class="checkbox mr-4">
+                            <input type="checkbox" name="especialidades[]" value="{{ cat.id_categoria }}"> {{ cat.nombre }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Botón -->
+            <div class="field mt-4">
+                <div class="control">
+                    <button class="button is-primary" type="submit">Registrar Revisor</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</section>
+{% endblock %}

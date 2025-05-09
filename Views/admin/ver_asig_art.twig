@@ -1,0 +1,56 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+
+        <h1 class="title">Artículos Pendientes ({{ total_art }})</h1>
+        <table class="table is-fullwidth is-striped is-bordered">
+            <thead>
+                <tr>
+                    <th rowspan="2">#</th>
+                    <th rowspan="2">Título</th>
+                    <th rowspan="2">Autor</th>
+                    <th rowspan="2">Tópico</th>
+                    <th rowspan="2">Revisor</th>
+                    <th colspan="2" class="has-text-centered">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for art in articulos %}
+                    {% set l1 = art.autores|length %}
+                    {% set l2 = art.topicos|length %}
+                    {% set l3 = art.revisores|length %}
+                    {% set max_len = l1 > l2 and l1 > l3 ? l1 : (l2 > l3 ? l2 : l3) %}
+
+                    {% for i in 0..(max_len - 1) %}
+                        <tr {% if i == 0 %}class="separador-top"{% elseif i == max_len - 1 %}class="separador-bottom"{% else %}class="separador"{% endif %}>
+                            {% if i == 0 %}
+                                <td rowspan="{{ max_len }}">{{ art.id_articulo }}</td>
+                                <td rowspan="{{ max_len }}">{{ art.titulo }}</td>
+                            {% endif %}
+                            <td>{{ art.autores[i] ?? '' }}</td>
+                            <td>{{ art.topicos[i] ?? '' }}</td>
+                            <td>{{ art.revisores[i].nombre_revisor ?? '' }}</td>
+                            <td>
+                            {% if art.revisores[i].id_usuario %}
+                                <form method="POST" action="/private/quitar_art/{{ art.id_articulo }}/revisor/{{ art.revisores[i].id_usuario }}/{{ section }}">
+                                    <button class="button is-small is-danger" type="submit">Quitar</button>
+                                </form>
+                            {% endif %}
+                            </td>
+                            {% if i == 0 %}
+                            <td class="has-background-info-light" rowspan="{{ max_len }}">
+                            <a class="button is-small is-info" href="/private/asignar_rev/{{ art.id_articulo }}">
+                                Asignar Revisor
+                            </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

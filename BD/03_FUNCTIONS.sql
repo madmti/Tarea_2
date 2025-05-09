@@ -273,3 +273,23 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE obtener_revisor_categoria(
+    IN p_id_usuario INT
+)
+BEGIN
+    SELECT 
+        u.id_usuario,
+        u.nombre,
+        u.email,
+        c.id_categoria,
+        c.nombre AS nombre_categoria
+    FROM usuario u
+    JOIN especialidad e ON u.id_usuario = e.id_revisor
+    JOIN categoria c ON e.id_categoria = c.id_categoria
+    WHERE u.id_usuario = p_id_usuario AND u.tipo = 'REV';
+END$$
+
+DELIMITER ;

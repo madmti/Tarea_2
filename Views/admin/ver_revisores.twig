@@ -1,0 +1,50 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Administrar Revisores</h1>
+
+        <table class="table is-fullwidth is-striped is-bordered">
+            <thead>
+                <tr>
+                    <th>Acción</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Especialidades</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rev in revisores %}
+                    <tr>
+                        <td class="is-vcentered">
+                            <div class="buttons">
+                                <a href="/private/revisores/{{ rev.id_usuario }}" class="button is-info is-small">Editar</a>
+                                <form method="POST" action="/private/revisores/quitar/{{ rev.id_usuario }}" style="display:inline;">
+                                    <button class="button is-danger is-small" type="submit">Quitar</button>
+                                </form>
+                            </div>
+                        </td>
+                        <td>{{ rev.nombre }}</td>
+                        <td>{{ rev.email }}</td>
+                        <td>
+                            {% for cat in categorias %}
+                                <label class="checkbox mr-3">
+                                    <input
+                                        type="checkbox"
+                                        disabled
+                                        {% if cat.id_categoria in rev.especialidades|map(e => e.id_categoria) %}checked{% endif %}>
+                                    {{ cat.nombre }}
+                                </label>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-5" style="text-align: right;">
+            <a href="/private/revisores/nuevo" class="button is-primary">+ Alta</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

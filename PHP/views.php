@@ -13,6 +13,11 @@ use API\ResponseHelper;
 use API\JwtHelper;
 
 return function (App $app, Twig $twig) {
+/**
+ * ===================================================================================================
+ *                                          GENERAL
+ * ===================================================================================================
+ */
     $app->get('/', function (Request $request, Response $response) use ($twig) {
         $pdo = $this->get('db');
         $queryParams = $request->getQueryParams();
@@ -78,6 +83,67 @@ return function (App $app, Twig $twig) {
         ]);
     });
 
+    $app->get('/mi_cuenta', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+        if ($user) {
+            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
+        }
+
+        return $twig->render($response, 'mi_cuenta.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+        ]);
+    });
+
+    $app->get('/editar_cuenta', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+        if ($user) {
+            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
+        }
+
+        return $twig->render($response, 'editar.twig', [
+            'user' => $user,
+            'error' => $error,
+            'info' => $info,
+        ]);
+    });
+
+    $app->get('/articulo/{id}', function (Request $request, Response $response, $args) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+        if ($user) {
+            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
+        }
+
+        $articulo = Functions::obtenerArticuloFull($pdo, $args['id']);
+
+        return $twig->render($response, 'articulo.twig', [
+            'user' => $user,
+            'articulo' => $articulo,
+            'error' => $error,
+            'info' => $info,
+        ]);
+    });
+/**
+ * ===================================================================================================
+ *                                     PROPIETARIOS (AUT/REV)
+ * ===================================================================================================
+ */
     $app->get('/protected/mis_articulos', function (Request $request, Response $response) use ($twig) {
         $pdo = $this->get('db');
         $queryParams = $request->getQueryParams();
@@ -192,64 +258,11 @@ return function (App $app, Twig $twig) {
             'info' => $info,
         ]);
     });
-
-    $app->get('/mi_cuenta', function (Request $request, Response $response) use ($twig) {
-        $pdo = $this->get('db');
-        $queryParams = $request->getQueryParams();
-        $error = $queryParams['error'] ?? null;
-        $info = $queryParams['info'] ?? null;
-        $token = Functions::ObtenerToken($request);
-        $user = Functions::verificarAuthUsuario($token);
-        if ($user) {
-            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
-        }
-
-        return $twig->render($response, 'mi_cuenta.twig', [
-            'user' => $user,
-            'info' => $info,
-            'error' => $error,
-        ]);
-    });
-
-    $app->get('/editar_cuenta', function (Request $request, Response $response) use ($twig) {
-        $pdo = $this->get('db');
-        $queryParams = $request->getQueryParams();
-        $error = $queryParams['error'] ?? null;
-        $info = $queryParams['info'] ?? null;
-        $token = Functions::ObtenerToken($request);
-        $user = Functions::verificarAuthUsuario($token);
-        if ($user) {
-            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
-        }
-
-        return $twig->render($response, 'editar.twig', [
-            'user' => $user,
-            'error' => $error,
-            'info' => $info,
-        ]);
-    });
-
-    $app->get('/articulo/{id}', function (Request $request, Response $response, $args) use ($twig) {
-        $pdo = $this->get('db');
-        $queryParams = $request->getQueryParams();
-        $error = $queryParams['error'] ?? null;
-        $info = $queryParams['info'] ?? null;
-        $token = Functions::ObtenerToken($request);
-        $user = Functions::verificarAuthUsuario($token);
-        if ($user) {
-            $user['es_propietario'] = Functions::esPropietario($pdo, $user['sub']);
-        }
-
-        $articulo = Functions::obtenerArticuloFull($pdo, $args['id']);
-
-        return $twig->render($response, 'articulo.twig', [
-            'user' => $user,
-            'articulo' => $articulo,
-            'error' => $error,
-            'info' => $info,
-        ]);
-    });
-
+/**
+ * ===================================================================================================
+ *                                        REVISORES
+ * ===================================================================================================
+ */
     $app->get('/protected/mis_revisiones', function (Request $request, Response $response) use ($twig) {
         $pdo = $this->get('db');
         $queryParams = $request->getQueryParams();
@@ -292,5 +305,148 @@ return function (App $app, Twig $twig) {
             'info' => $info,
         ]);
     });
+/**
+ * ===================================================================================================
+ *                                     ADMINISTRADORES
+ * ===================================================================================================
+ */
+    $app->get('/private/revisores', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
 
+        $revisores = Functions::obtenerRevisoresEspecialidad($pdo) ?? [];
+        $revisores = Functions::agruparRevisoresEspecialidad($revisores);
+        $categorias = Functions::obtenerCategorias($pdo) ?? [];
+
+        return $twig->render($response, 'admin/ver_revisores.twig', [
+            'user' => $user,
+            'total' => count($revisores),
+            'revisores' => $revisores,
+            'categorias' => $categorias,
+            'info' => $info,
+            'error' => $error,
+        ]);
+    });
+
+    $app->get('/private/revisores/nuevo', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $categorias = Functions::obtenerCategorias($pdo) ?? [];
+
+        return $twig->render($response, 'admin/agregar_revisor.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+            'categorias' => $categorias,
+        ]);
+    });
+
+    $app->get('/private/revisores/{id}', function (Request $request, Response $response, $args) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $idRevisor = $args['id'];
+        $revisor = Functions::obtenerRevisorEspecialidad($pdo, $idRevisor) ?? [];
+        $revisor = Functions::agruparRevisoresEspecialidad($revisor)[$idRevisor] ?? [];
+        $categorias = Functions::obtenerCategorias($pdo) ?? [];
+
+        return $twig->render($response, 'admin/editar_revisor.twig', [
+            'user' => $user,
+            'revisor' => $revisor,
+            'categorias' => $categorias,
+            'info' => $info,
+            'error' => $error,
+        ]);
+    });
+
+    $app->get('/private/asignaciones/articulos', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $articulos = Functions::obtenerArticulosAutoresTopicosRevisores($pdo) ?? [];
+        $articulos = Functions::agruparArticulosAutoresTopicosRevisores($articulos);
+
+        return $twig->render($response, 'admin/ver_asig_art.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+            'total_art' => count($articulos),
+            'articulos' => $articulos,
+            'section' => 'articulos',
+        ]);
+    });
+
+    $app->get('/private/asignaciones/revisores', function (Request $request, Response $response) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $revisores = Functions::obtenerRevisoresTopicosArticulos($pdo) ?? [];
+        $revisores = Functions::agruparRevisoresTopicosArticulos($revisores);
+
+        return $twig->render($response, 'admin/ver_asig_rev.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+            'total_rev' => count($revisores),
+            'revisores' => $revisores,
+            'section' => 'revisores',
+        ]);
+    });
+
+    $app->get('/private/asignar_rev/{id_articulo}', function (Request $request, Response $response, $args) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $id_articulo = $args['id_articulo'];
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        return $twig->render($response, 'admin/art_to_rev.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+        ]);
+    });
+
+    $app->get('/private/asignar_art/{id_revisor}', function (Request $request, Response $response, $args) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $id_revisor = $args['id_revisor'];
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $revisor = Functions::obtenerRevisorEspecialidad($pdo, $id_revisor) ?? [];
+        $revisor = Functions::agruparRevisoresEspecialidad($revisor)[$id_revisor] ?? [];
+
+        return $twig->render($response, 'admin/rev_to_art.twig', [
+            'user' => $user,
+            'info' => $info,
+            'error' => $error,
+            'revisor' => $revisor,
+        ]);
+    });
 };
