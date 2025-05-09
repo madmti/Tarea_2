@@ -1,4 +1,173 @@
 {% extends "layouts/base.twig" %}
 
 {% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Editar artículo</h1>
+
+        <form method="POST" action="/protected/mis_articulos/{{ articulo.id_articulo }}/editar">
+
+            <!-- Título -->
+            <div class="field">
+                <label class="label">Título</label>
+                <div class="control">
+                    <input class="input" type="text" name="titulo" required maxlength="50" value="{{ articulo.titulo|e }}">
+                </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="field">
+                <label class="label">Resumen</label>
+                <div class="control">
+                    <textarea class="textarea" name="resumen" required maxlength="150">{{ articulo.resumen|e }}</textarea>
+                </div>
+            </div>
+
+            <!-- Tópicos -->
+            <div class="field">
+                <label class="label">Tópicos</label>
+                <div class="control">
+                    {% for topico in topicos %}
+                        <label class="checkbox mr-4">
+                            <input type="checkbox" name="topicos[]" value="{{ topico.id_categoria }}"
+                                {% if topico.id_categoria in topicos_asociados %}checked{% endif %}>
+                            {{ topico.nombre }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Buscar autores -->
+            <div class="field">
+                <label class="label">Buscar autor por nombre</label>
+                <div class="control has-icons-left">
+                    <input class="input" type="text" id="busqueda-autor" placeholder="Nombre del autor">
+                    <span class="icon is-left">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+                <div id="resultados-autores" class="box mt-2" style="display:none;"></div>
+            </div>
+
+            <!-- Lista de autores -->
+            <div class="field mt-4">
+                <label class="label">Autores seleccionados</label>
+                <table class="table is-fullwidth is-bordered is-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Contacto</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="autores-seleccionados">
+                        {% for autor in autores_asociados %}
+                            <tr>
+                                <td>{{ autor.nombre }}</td>
+                                <td>{{ autor.email }}</td>
+                                <td>
+                                    <input type="radio" name="autor_contacto" value="{{ autor.id_usuario }}"
+                                        {% if autor.es_contacto %}checked{% endif %}>
+                                </td>
+                                <td>
+                                    {% if autor.id_usuario != user.sub %}
+                                        <button type="button" class="button is-small is-danger" onclick="removerAutorExistente({{ autor.id_usuario }})">Quitar</button>
+                                    {% endif %}
+                                </td>
+                                <input type="hidden" name="autores[]" value="{{ autor.id_usuario }}">
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Enviar -->
+            <div class="field mt-5">
+                <div class="control">
+                    <button class="button is-primary" type="submit">Actualizar artículo</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+const id_usuario = {{ user.sub }};
+const autoresDisponibles = {{ autores|json_encode|raw }};
+const autoresYaAgregados = new Set({{ autores_asociados|map(a => a.id_usuario)|json_encode|raw }});
+
+const inputBusqueda = document.getElementById('busqueda-autor');
+const resultados = document.getElementById('resultados-autores');
+const tablaAutores = document.getElementById('autores-seleccionados');
+
+function renderAutores() {
+    tablaAutores.innerHTML = '';
+
+    autoresAgregados.forEach((autor, index) => {
+        tablaAutores.innerHTML += `
+            <tr>
+                <td>${autor.nombre}</td>
+                <td>${autor.email}</td>
+                <td>
+                    <input type="radio" name="autor_contacto" value="${autor.id_usuario}">
+                </td>
+                <td>
+                    <button type="button" class="button is-small is-danger" onclick="removerAutor(${index})">Quitar</button>
+                </td>
+                <input type="hidden" name="autores[]" value="${autor.id_usuario}">
+            </tr>
+        `;
+    });
+}
+
+function removerAutorExistente(id) {
+    const row = document.querySelector(`input[value="${id}"]`).closest('tr');
+    if (row) row.remove();
+}
+
+let autoresAgregados = [];
+
+function removerAutor(index) {
+    autoresAgregados.splice(index, 1);
+    renderAutores();
+}
+
+inputBusqueda.addEventListener('input', () => {
+    const query = inputBusqueda.value.toLowerCase();
+    resultados.innerHTML = '';
+    if (query.length < 2) {
+        resultados.style.display = 'none';
+        return;
+    }
+
+    const filtrados = autoresDisponibles.filter(a => 
+        a.nombre.toLowerCase().includes(query) &&
+        !autoresYaAgregados.has(a.id_usuario) &&
+        !autoresAgregados.find(b => b.id_usuario === a.id_usuario)
+    );
+
+    if (filtrados.length === 0) {
+        resultados.innerHTML = '<p class="has-text-grey">No se encontraron autores.</p>';
+        resultados.style.display = 'block';
+        return;
+    }
+
+    filtrados.forEach(autor => {
+        const div = document.createElement('div');
+        div.className = 'p-2 is-clickable';
+        div.textContent = `${autor.nombre} (${autor.email})`;
+        div.onclick = () => {
+            autoresAgregados.push({...autor});
+            autoresYaAgregados.add(autor.id_usuario);
+            renderAutores();
+            resultados.style.display = 'none';
+            inputBusqueda.value = '';
+        };
+        resultados.appendChild(div);
+    });
+
+    resultados.style.display = 'block';
+});
+</script>
 {% endblock %}

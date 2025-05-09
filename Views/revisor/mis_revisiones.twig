@@ -1,0 +1,40 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Mis Revisiones</h1>
+
+        {% if total > 0 %}
+            <p class="subtitle">Tienes {{ total }} revisión{{ total == 1 ? '' : 'es' }} pendiente{{ total == 1 ? '' : 's' }}.</p>
+
+            <table class="table is-fullwidth is-bordered is-striped mt-4">
+                <thead>
+                    <tr>
+                        <th>Título del artículo</th>
+                        <th>Fecha de envío</th>
+                        <th>Fecha de asignación</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rev in revisiones %}
+                        <tr>
+                            <td>{{ rev.titulo_articulo|e }}</td>
+                            <td>{{ rev.fecha_envio|date('d-m-Y') }}</td>
+                            <td>{{ rev.fecha_emision|date('d-m-Y') }}</td>
+                            <td>
+                                <a class="button is-small is-link" href="/protected/revisar/{{ rev.id_articulo }}">Revisar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="notification is-info">
+                No tienes revisiones asignadas por el momento.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

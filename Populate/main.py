@@ -3,7 +3,7 @@ from gen import DataGenerator
 from tablesdata import TableData
 
 def get_path(file_name:str) -> str:
-    return path.join(path.dirname(path.dirname(path.dirname(__file__))), "BD", file_name)
+    return path.join(path.dirname(path.dirname(__file__)), "BD", file_name)
 
 def data_to_file(data:dict[str, list['TableData']], file_name:str) -> None:
     file_path = get_path(file_name)

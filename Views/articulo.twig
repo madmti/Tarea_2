@@ -7,13 +7,14 @@
 
         <!-- Metadatos -->
         <div class="content mb-4">
-            <p><strong>Fecha de publicación:</strong> {{ articulo.fecha_envio|date('d-m-Y') }}</p>
+            <p><strong>Fecha de envío:</strong> {{ articulo.fecha_envio|date('d-m-Y') }}</p>
             <p><strong>Autores:</strong> {{ articulo.autores|e }}</p>
             <p><strong>Tópicos:</strong> {{ articulo.topicos|e }}</p>
         </div>
 
         <!-- Contenido del artículo -->
         <div class="box">
+            <h2 class="subtitle">Resumen</h2>
             <p>{{ articulo.resumen|e|nl2br }}</p>
         </div>
 

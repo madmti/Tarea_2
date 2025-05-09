@@ -207,7 +207,7 @@ class Functions {
      */
     public static function obtenerAutores(\PDO $pdo): ?array {
         try {
-            $stmt = $pdo->query("SELECT * FROM usuarios_publico WHERE tipo = 'AUT'");
+            $stmt = $pdo->query("SELECT * FROM propietarios");
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error al obtener autores: " . $e->getMessage());
@@ -240,6 +240,84 @@ class Functions {
         }
     }
     /**
+     * Obtener revisiones asignadas a un revisor.
+     */
+    public static function obtenerMisRevisiones(\PDO $pdo, int $idRevisor): ?array {
+        try {
+            $stmt = $pdo->prepare("CALL obtener_revisiones_revisor(:id_revisor)");
+            $stmt->execute(['id_revisor' => $idRevisor]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener revisiones del revisor: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener información completa de una revisión por revisor y artículo.
+     */
+    public static function obtenerRevisionFull(\PDO $pdo, int $idRevisor, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("CALL obtener_revision_full(:id_revisor, :id_articulo)");
+            $stmt->execute([
+                'id_revisor' => $idRevisor,
+                'id_articulo' => $idArticulo
+            ]);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener información completa de la revisión: " . $e->getMessage());
+            return null;
+        }
+    }
+    public static function obtenerDetallesArticulo(\PDO $pdo, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("CALL obtener_detalles_articulo(:id_articulo)");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener detalles del artículo: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener todos los datos de un artículo por su ID.
+     */
+    public static function obtenerArticuloCompleto(\PDO $pdo, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM articulo WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener todos los datos del artículo: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener tópicos asociados a un artículo.
+     */
+    public static function obtenerTopicos(\PDO $pdo, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("SELECT id_categoria FROM topico WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener tópicos: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
+     * Obtener autores asociados a un artículo.
+     */
+    public static function obtenerAutoresAsociados(\PDO $pdo, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("CALL obtener_autores_asociados(:id_articulo)");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener autores asociados: " . $e->getMessage());
+            return null;
+        }
+    }
+    /**
      * ================================================================
      *                              UPDATE
      * ================================================================
@@ -258,6 +336,93 @@ class Functions {
             return true;
         } catch (\PDOException $e) {
             error_log("Error al actualizar artículo: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Actualizar una revisión utilizando un procedimiento almacenado.
+     * Data: calidad_tecnica, originalidad, valoracion_global, estado, argumentos
+     */
+    public static function actualizarRevision(\PDO $pdo, int $idArticulo, int $idRevisor, array $data): bool {
+        try {
+            $stmt = $pdo->prepare("CALL actualizar_revision(:id_articulo, :id_revisor, :calidad_tecnica, :originalidad, :valoracion_global, :estado, :argumentos)");
+            $stmt->execute([
+                'id_articulo' => $idArticulo,
+                'id_revisor' => $idRevisor,
+                'calidad_tecnica' => $data['calidad_tecnica'],
+                'originalidad' => $data['originalidad'],
+                'valoracion_global' => $data['valoracion_global'],
+                'estado' => $data['estado'],
+                'argumentos' => json_encode($data['argumentos'])
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar revisión: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Actualizar un usuario.
+     * Data: rut, email, nombre, contrasena
+     */
+    public static function actualizarUsuario(\PDO $pdo, int $idUsuario, array $data): bool {
+        try {
+            $hash = $data['contrasena'] ? password_hash($data['contrasena'], PASSWORD_BCRYPT) : null;
+            $stmt = $pdo->prepare("CALL actualizar_usuario(:id_usuario, :nombre, :email, :contrasena)");
+            $stmt->execute([
+                'id_usuario' => $idUsuario,
+                'nombre' => $data['nombre'],
+                'email' => $data['email'],
+                'contrasena' => $hash
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar usuario: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Actualizar tópicos asociados a un artículo.
+     * Data: array de IDs de tópicos.
+     */
+    public static function actualizarTopicos(\PDO $pdo, int $idArticulo, array $topicos): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM topico WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+
+            $stmt = $pdo->prepare("INSERT INTO topico (id_categoria, id_articulo) VALUES (:id_categoria, :id_articulo)");
+            foreach ($topicos as $topico) {
+                $stmt->execute([
+                    'id_categoria' => $topico,
+                    'id_articulo' => $idArticulo
+                ]);
+            }
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar tópicos: " . $e->getMessage());
+            return false;
+        }
+    }
+    /**
+     * Actualizar propiedad de un artículo.
+     * Data: array de IDs de autores, contacto (ID de autor).
+     */
+    public static function actualizarPropiedad(\PDO $pdo, int $idArticulo, array $autores, int $contacto): bool {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM propiedad WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+
+            $stmt = $pdo->prepare("INSERT INTO propiedad (id_articulo, id_autor, es_contacto) VALUES (:id_articulo, :id_autor, :es_contacto)");
+            foreach ($autores as $autor) {
+                $stmt->execute([
+                    'id_articulo' => $idArticulo,
+                    'id_autor' => $autor,
+                    'es_contacto' => $autor === $contacto ? 1 : 0
+                ]);
+            }
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al actualizar propiedad: " . $e->getMessage());
             return false;
         }
     }
@@ -337,23 +502,23 @@ class Functions {
             return false;
         }
     }
-    /**
-     * Actualizar un usuario utilizando un procedimiento almacenado.
-     * Data: rut, email, nombre, contrasena
-     */
-    public static function actualizarUsuario(\PDO $pdo, int $idUsuario, array $data): bool {
+    public static function esPropietario(\PDO $pdo, int $idUsuario): bool {
         try {
-            $hash = $data['contrasena'] ? password_hash($data['contrasena'], PASSWORD_BCRYPT) : null;
-            $stmt = $pdo->prepare("CALL actualizar_usuario(:id_usuario, :nombre, :email, :contrasena)");
-            $stmt->execute([
-                'id_usuario' => $idUsuario,
-                'nombre' => $data['nombre'],
-                'email' => $data['email'],
-                'contrasena' => $hash
-            ]);
+            $stmt = $pdo->prepare("CALL es_propietario(:id_usuario)");
+            $stmt->execute(['id_usuario' => $idUsuario]);
+            return (bool) $stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            error_log("Error al verificar propietario: " . $e->getMessage());
+            return false;
+        }
+    }
+    public static function asignarRevisores(\PDO $pdo, int $idArticulo): bool {
+        try {
+            $stmt = $pdo->prepare("CALL asignar_revisores(:id_articulo)");
+            $stmt->execute(['id_articulo' => $idArticulo]);
             return true;
         } catch (\PDOException $e) {
-            error_log("Error al actualizar usuario: " . $e->getMessage());
+            error_log("Error al asignar revisores: " . $e->getMessage());
             return false;
         }
     }

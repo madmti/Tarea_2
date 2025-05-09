@@ -30,8 +30,10 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if articulo.aprobado is null %}
+                            {% if articulo.aprobado is null %}                                
+                                {% if articulo.editable %}
                                 <a href="/protected/mis_articulos/{{ articulo.id_articulo }}/editar" class="button is-small is-primary">Editar</a>
+                                {% endif %}
                             {% else %}
                                 <a href="/protected/mis_articulos/{{ articulo.id_articulo }}" class="button is-small is-info">Ver Detalles</a>
                             {% endif %}

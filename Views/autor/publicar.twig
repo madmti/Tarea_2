@@ -1,7 +1,5 @@
 {% extends "layouts/base.twig" %}
 
-{% block title %}Enviar artículo{% endblock %}
-
 {% block content %}
 <section class="section">
     <div class="container">
@@ -68,11 +66,11 @@
                         <td>{{ user.nombre }}</td>
                         <td>{{ user.email }}</td>
                         <td>
-                            <input type="radio" name="autor_contacto" value="{{ user.id_usuario }}" checked>
+                            <input type="radio" name="autor_contacto" value="{{ user.sub }}" checked>
                         </td>
                         <td>
                         </td>
-                        <input type="hidden" name="autores[]" value="${{ user.id_usuario }}">
+                        <input type="hidden" name="autores[]" value="{{ user.sub }}">
                     </tr>
                 </table>
             </div>

@@ -1,4 +1,6 @@
 import random
+import bcrypt
+import unicodedata
 from tablesdata import *
 from const import *
 
@@ -54,7 +56,7 @@ class DataGenerator(AutoInit):
                 rut=rut,
                 nombre=nombre,
                 email=email,
-                contrasena=FieldGenerator.generate_password(),
+                contrasena=FieldGenerator.generate_password('ADM'),
             ))
             self.current_users += 1
 
@@ -68,7 +70,7 @@ class DataGenerator(AutoInit):
                 rut=rut,
                 nombre=nombre,
                 email=email,
-                contrasena=FieldGenerator.generate_password(),
+                contrasena=FieldGenerator.generate_password('AUT'),
             ))
             self.current_users += 1
 
@@ -82,7 +84,7 @@ class DataGenerator(AutoInit):
                 rut=rut,
                 nombre=nombre,
                 email=email,
-                contrasena=FieldGenerator.generate_password(),
+                contrasena=FieldGenerator.generate_password('REV'),
             ))
             self.current_users += 1
 
@@ -114,7 +116,7 @@ class DataGenerator(AutoInit):
                 self.__data['propiedades'].append(Propiedad(
                     id_articulo=articulo.get('id_articulo'),
                     id_autor=dueño.get('id_usuario'),
-                    es_contacto=(i == 0),
+                    es_contacto=(i == 1),
                 ))
 
     def __get_revisores_disponibles(self, topico:int, autores_articulo:list[int], revisores_asignados:set[int]) -> list[int]:
@@ -146,28 +148,32 @@ class DataGenerator(AutoInit):
                 if propiedad.get('id_articulo') == articulo.get('id_articulo')
             ]
             revisores_asignados = set()
+            seleccionados = set()
             for topico in topicos_articulo:
                 revisores_disponibles = self.__get_revisores_disponibles(topico, autores_articulo, revisores_asignados)
-                seleccionados = random.sample(revisores_disponibles, min(3, len(revisores_disponibles)))
+                seleccionado = random.choice(revisores_disponibles) if revisores_disponibles else None
+                if seleccionado is not None:
+                    seleccionados.add(seleccionado)
+                    revisores_disponibles.remove(seleccionado)
 
-                for revisor in seleccionados:
-                    estado = random.choices([True, False, None], weights=[90, 5, 5], k=1)[0]
-                    calidad_tecnica = None if estado is None else FieldGenerator.generate_calificacion()
-                    originalidad = None if estado is None else FieldGenerator.generate_calificacion()
-                    valoracion_global = None if estado is None else FieldGenerator.generate_calificacion()
-                    fecha_emision = None if estado is None else FieldGenerator.generate_fecha_antes_de(articulo.get('fecha_envio'))
-                    argumentos = None if estado is None else FieldGenerator.generate_argumentos()
-                    self.__data['revisiones'].append(Revision(
-                        id_articulo=articulo.get('id_articulo'),
-                        id_revisor=revisor,
-                        estado=estado,
-                        calidad_tecnica=calidad_tecnica,
-                        originalidad=originalidad,
-                        valoracion_global=valoracion_global,
-                        fecha_emision=fecha_emision,
-                        argumentos=argumentos,
-                    ))
-                    revisores_asignados.add(revisor)
+            for revisor in seleccionados:
+                estado = random.choices([True, False, None], weights=[90, 5, 5], k=1)[0]
+                calidad_tecnica = None if estado is None else FieldGenerator.generate_calificacion()
+                originalidad = None if estado is None else FieldGenerator.generate_calificacion()
+                valoracion_global = None if estado is None else FieldGenerator.generate_calificacion()
+                fecha_emision = None if estado is None else FieldGenerator.generate_fecha_despues_de(articulo.get('fecha_envio'))
+                argumentos = None if estado is None else FieldGenerator.generate_argumentos()
+                self.__data['revisiones'].append(Revision(
+                    id_articulo=articulo.get('id_articulo'),
+                    id_revisor=revisor,
+                    estado=estado,
+                    calidad_tecnica=calidad_tecnica,
+                    originalidad=originalidad,
+                    valoracion_global=valoracion_global,
+                    fecha_emision=fecha_emision,
+                    argumentos=argumentos,
+                ))
+                revisores_asignados.add(revisor)
 
     def generate(self) -> None:
         for method in self.__generate_order:
@@ -194,13 +200,17 @@ class FieldGenerator:
     def generate_unique_nombre() -> str:
         while True:
             nombre = FAKER.name()
+            nombre = ''.join(
+                c for c in unicodedata.normalize('NFD', nombre)
+                if unicodedata.category(c) != 'Mn'
+            )
             if nombre not in FieldGenerator.__used_nombres:
                 FieldGenerator.__used_nombres.add(nombre)
                 return nombre
 
     @staticmethod
     def generate_fecha() -> str:
-        return f"{random.randint(2000, 2023)}-{random.randint(1, 12):02}-{random.randint(1, 28):02}"
+        return f"{random.randint(2000, 2030)}-{random.randint(1, 12):02}-{random.randint(1, 28):02}"
 
     @staticmethod
     def generate_unique_titulo() -> str:
@@ -211,8 +221,17 @@ class FieldGenerator:
                 return titulo
 
     @staticmethod
-    def generate_password() -> str:
-        return FAKER.password(length=30, special_chars=True, digits=True, upper_case=True, lower_case=True)
+    def generate_password(tipo_usuario:str) -> str:
+        switch = {
+            'ADM': 'admin123',
+            'AUT': 'autor123',
+            'REV': 'revisor123',
+        }
+        if tipo_usuario in switch:
+            password = switch[tipo_usuario]
+        else:
+            password = FAKER.password(length=30, special_chars=True, digits=True, upper_case=True, lower_case=True)
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     @staticmethod
     def generate_resumen() -> str:
@@ -223,11 +242,11 @@ class FieldGenerator:
         return random.randint(1, 10)
 
     @staticmethod
-    def generate_fecha_antes_de(fecha:str) -> str:
+    def generate_fecha_despues_de(fecha:str) -> str:
         year, month, day = map(int, fecha.split('-'))
-        dia = random.randint(1, day)
-        mes = random.randint(1, month)
-        anio = random.randint(2000, year)
+        dia = random.randint(day, 28)
+        mes = random.randint(month, 12)
+        anio = random.randint(year, 2030)
         return f"{anio}-{mes:02}-{dia:02}"
 
     @staticmethod

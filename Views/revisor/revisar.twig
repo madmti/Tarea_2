@@ -1,0 +1,128 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Revisión del artículo</h1>
+        <div class="box">
+            <h2 class="subtitle has-text-weight-semibold">{{ revision.titulo_articulo|e }}</h2>
+            <p><strong>Resumen:</strong> {{ revision.resumen_articulo|e }}</p>
+            <p><strong>Fecha de envío:</strong> {{ revision.fecha_envio|date('d-m-Y') }}</p>
+            <p><strong>Autores:</strong> {{ revision.autores|e }}</p>
+        </div>
+
+        {% if revision.estado is not null %}
+            <div class="notification is-success">
+                Esta revisión ya fue completada.
+            </div>
+        {% else %}
+            <form method="POST" action="/protected/revisar/{{ revision.id_articulo }}">
+
+                <div class="field">
+                    <label class="label">Calidad técnica (1 a 10)</label>
+                    <div class="control">
+                        <input class="input" type="number" name="calidad_tecnica" min="1" max="10" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Originalidad (1 a 10)</label>
+                    <div class="control">
+                        <input class="input" type="number" name="originalidad" min="1" max="10" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Valoración global (1 a 10)</label>
+                    <div class="control">
+                        <input class="input" type="number" name="valoracion_global" min="1" max="10" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Argumentos</label>
+                    <div id="argumentos-lista" class="box">
+                        <!-- Lista dinámica de argumentos -->
+                    </div>
+                    <div class="field is-grouped">
+                        <div class="control is-expanded">
+                            <input class="input" type="text" id="input-tema" placeholder="Tema (ej. Originalidad)">
+                        </div>
+                        <div class="control is-expanded">
+                            <input class="input" type="text" id="input-motivo" placeholder="Motivo o comentario">
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-info" onclick="agregarArgumento()">Agregar</button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="argumentos" id="input-argumentos-json" required>
+                    <p class="help">Agrega al menos un argumento para justificar tu evaluación.</p>
+                </div>
+
+
+                <div class="field">
+                    <label class="label">Decisión</label>
+                    <div class="control">
+                        <label class="radio">
+                            <input type="radio" name="estado" value="1" required> Aprobar
+                        </label>
+                        <label class="radio">
+                            <input type="radio" name="estado" value="0"> Rechazar
+                        </label>
+                    </div>
+                </div>
+
+                <div class="notification is-warning is-light mt-5">
+                    <strong>Nota:</strong> una vez enviada la revisión, no podrás modificarla.
+                </div>
+
+                <div class="field mt-4">
+                    <div class="control">
+                        <button type="submit" class="button is-primary">Enviar revisión</button>
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</section>
+<script>
+let argumentos = {};
+
+function renderArgumentos() {
+    const lista = document.getElementById('argumentos-lista');
+    lista.innerHTML = '';
+    for (const [tema, motivo] of Object.entries(argumentos)) {
+        const item = document.createElement('div');
+        item.className = 'mb-2';
+        item.innerHTML = `
+            <strong>${tema}</strong>: ${motivo}
+            <button type="button" class="delete is-small ml-2" onclick="eliminarArgumento('${tema}')"></button>
+        `;
+        lista.appendChild(item);
+    }
+
+    // Actualizar input hidden como JSON
+    document.getElementById('input-argumentos-json').value = JSON.stringify(argumentos);
+}
+
+function agregarArgumento() {
+    const tema = document.getElementById('input-tema').value.trim();
+    const motivo = document.getElementById('input-motivo').value.trim();
+
+    if (!tema || !motivo) {
+        alert("Debes completar ambos campos para agregar un argumento.");
+        return;
+    }
+
+    argumentos[tema] = motivo;
+    document.getElementById('input-tema').value = '';
+    document.getElementById('input-motivo').value = '';
+    renderArgumentos();
+}
+
+function eliminarArgumento(tema) {
+    delete argumentos[tema];
+    renderArgumentos();
+}
+</script>
+{% endblock %}
