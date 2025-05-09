@@ -1,0 +1,36 @@
+{% extends "layouts/base.twig" %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Mi Cuenta</h1>
+
+        {% if user %}
+            <div class="box">
+                <p><strong>Nombre:</strong> {{ user.nombre|e }}</p>
+                <p><strong>Email:</strong> {{ user.email|e }}</p>
+                <p><strong>Rol:</strong>
+                <span class="tag is-info">
+                    {% if user.tipo == 'ADM' %}
+                        Jefe de Comité
+                    {% elseif user.tipo == 'AUT' %}
+                        Autor
+                    {% elseif user.tipo == 'REV' %}
+                        Revisor
+                    {% else %}
+                        Desconocido
+                    {% endif %}
+                </span></p>
+            </div>
+
+            <div class="buttons">
+                <a href="/editar_cuenta" class="button is-link">Editar información</a>
+                <a href="/logout" class="button is-danger">Cerrar sesión</a>
+            </div>
+        {% else %}
+            <div class="notification is-warning">
+                No has iniciado sesión. <a href="/login">Haz clic aquí para ingresar</a>.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

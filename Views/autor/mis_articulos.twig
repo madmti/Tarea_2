@@ -1,0 +1,50 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<div class="container is-fluid">
+    <h1 class="title">Mis Artículos</h1>
+    {% if articulos is not empty %}
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Fecha de Envío / Fecha Tope</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for articulo in articulos %}
+                    <tr>
+                        <td>{{ articulo.titulo|e }}</td>
+                        <td>{{ articulo.fecha_envio|date("d/m/Y") }}</td>
+                        <td>
+                            {% if articulo.aprobado is null %}
+                                <span class="tag is-warning">Pendiente</span>
+                            {% elseif articulo.aprobado == false %}
+                                <span class="tag is-danger">Rechazado</span>
+                            {% elseif articulo.aprobado == true %}
+                                <span class="tag is-success">Aprobado</span>
+                            {% else %}
+                                <span class="tag">Desconocido</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if articulo.aprobado is null %}
+                                <a href="/protected/mis_articulos/{{ articulo.id_articulo }}/editar" class="button is-small is-primary">Editar</a>
+                            {% else %}
+                                <a href="/protected/mis_articulos/{{ articulo.id_articulo }}" class="button is-small is-info">Ver Detalles</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <small class="has-text-grey">
+        <strong>Fecha de Envío / Fecha Tope:</strong> indica cuándo se envía el artículo final, y tambien es la fecha límite para editar el artículo.
+    </small>
+    {% else %}
+        <p>No tienes artículos registrados.</p>
+    {% endif %}
+</div>
+{% endblock %}

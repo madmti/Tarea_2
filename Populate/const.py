@@ -2,7 +2,7 @@ from faker import Faker
 
 CATEGORIAS = [
     "Gestion de proyectos", "Desarrollo de Software", "Ciencia de datos", "Operaciones", "Operaciones de TI",
-    "Seguridad de la información", "Inteligencia artificial", "Redes y telecomunicaciones", "Sistemas de información", "Operaciones de red",
+    "Seguridad de la informacion", "Inteligencia artificial", "Redes y telecomunicaciones", "Sistemas de informacion", "Operaciones de red",
 ]
 
 DIGITOS_VERIFICADORES = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'K']
@@ -16,7 +16,7 @@ TITULO_INICIO = [
 TITULO_VERBOS = [
     "aprender", "usar", "crear", "mejorar", "entender", "desarrollar",
     "implementar", "optimizar", "gestionar", "analizar", "configurar",
-    "proteger", "evaluar", "diseñar", "mantener", "administrar",
+    "proteger", "evaluar", "disenar", "mantener", "administrar",
     "instalar", "programar", "depurar", "probar", "documentar",
 ]
 TITULO_OBJETOS = [

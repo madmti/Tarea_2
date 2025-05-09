@@ -6,9 +6,11 @@ use Firebase\JWT\Key;
 
 class JwtHelper {
     private static string $secret = 'CLAVE_SUPER_SECRETA';
-    public static function generarToken(int $idUsuario, string $tipo): string {
+    public static function generarToken(int $idUsuario, string $tipo, string $nombre, string $email): string {
         $payload = [
             'sub' => $idUsuario,
+            'nombre' => $nombre,
+            'email' => $email,
             'tipo' => $tipo,
             'iat' => time(),
             'exp' => time() + 3600  // 1H de validez

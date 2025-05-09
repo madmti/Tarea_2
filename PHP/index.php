@@ -5,6 +5,8 @@ require_once '/var/php/API/middleware.php';
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
 use DI\Container;
+use Slim\Views\Twig;
+use Slim\Views\TwigMiddleware;
 use API\AuthMiddleware;
 
 $container = new Container();
@@ -23,19 +25,17 @@ $container->set('db', function () {
     return $pdo;
 });
 
+$twig = Twig::create('/var/views', ['cache' => false]);
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
 $app->add(new AuthMiddleware());
+$app->add(TwigMiddleware::create($app, $twig));
 $app->addBodyParsingMiddleware();
 
-$front_routes = require '/var/php/views.php';
-$front_routes($app);
+$routes = require '/var/php/routes.php';
+$routes($app, $twig);
 
-$back_routes = require '/var/php/endpoints.php';
-$app->group('/api', function (RouteCollectorProxy $group) use ($back_routes) {
-    $back_routes($group);
-});
 
 $app->run();

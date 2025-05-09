@@ -1,0 +1,37 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<div class="container is-fluid">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <h1 class="title">Iniciar Sesión</h1>
+            <form method="POST" action="/login">
+                <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="email" name="email" placeholder="Ingrese su correo electrónico" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Contraseña</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="password" name="contrasena" placeholder="Ingrese su contraseña" required>
+                    </div>
+                </div>
+
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">Iniciar Sesión</button>
+                    </div>
+                    <div class="control">
+                        <a class="button is-light" href="/">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>
+{% endblock %}

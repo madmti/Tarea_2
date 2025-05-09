@@ -1,0 +1,107 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<div class="container is-fluid">
+    <div class="columns is-vcentered">
+        <div class="column">
+            <h1 class="title">Artículos ({{ total }})</h1>
+        </div>
+        <div class="column is-narrow">
+            <form method="GET" action="/">
+                <div class="field has-addons">
+                    <div class="control">
+                        <input class="input" autocomplete="off" type="text" name="titulo" placeholder="Buscar artículos..." value="{{ queryParams.titulo ?? '' }}">
+                    </div>
+                    <div class="control">
+                        <button class="button is-info" type="submit">
+                            Buscar
+                        </button>
+                    </div>
+                    <div class="control">
+                        <div class="dropdown is-right is-hoverable">
+                            <div class="dropdown-trigger">
+                                <button type="button" class="button is-primary" aria-haspopup="true" aria-controls="dropdown-menu">
+                                    Filtros especiales
+                                </button>
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                                <div class="dropdown-content">
+                                    <div class="dropdown-item">
+                                        <label class="label">Fecha desde</label>
+                                        <input class="input" type="date" name="desde" value="{{ queryParams.fecha_ini ?? '' }}">
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <label class="label">Fecha hasta</label>
+                                        <input class="input" type="date" name="hasta" value="{{ queryParams.fecha_fin ?? '' }}">
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <label class="label">Categoría</label>
+                                        <div class="select is-fullwidth">
+                                            <select name="categoria_id">
+                                                <option value="">Seleccionar categoría</option>
+                                                {% for categoria in categorias %}
+                                                    <option value="{{ categoria.id_categoria }}" {% if categoria.id_categoria == queryParams.categoria_id %}selected{% endif %}>
+                                                        {{ categoria.nombre }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <label class="label">Revisor</label>
+                                        <div class="select is-fullwidth">
+                                            <select name="revisor_id">
+                                                <option value="">Seleccionar revisor</option>
+                                                {% for revisor in revisores %}
+                                                    <option value="{{ revisor.id_usuario }}" {% if revisor.id_usuario == queryParams.revisor_id %}selected{% endif %}>
+                                                        {{ revisor.nombre }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-item">
+                                        <a class="button is-danger is-fullwidth" href="/">
+                                            Borrar todos los filtros
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if articulos is not empty %}
+        <div class="columns is-multiline">
+            {% for articulo in articulos %}
+                <div class="column is-one-third">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-content">
+                                    <p class="title is-4">{{ articulo.titulo|e }}</p>
+                                    <p class="subtitle is-6"><strong>Fecha de envío:</strong> {{ articulo.fecha_envio|e }}</p>
+                                </div>
+                            </div>
+                            <div class="content">
+                                {{ articulo.resumen|e|nl2br }}
+                                <br>
+                                <strong>Tópicos:</strong> {{ articulo.topicos|e }}
+                            </div>
+                        </div>
+                        <footer class="card-footer">
+                            <a href="/articulo/{{ articulo.id_articulo }}" class="card-footer-item">Leer más</a>
+                            <a onclick="alert('Compartiendo link a: {{ articulo.titulo }}')" href="#" class="card-footer-item">Compartir</a>
+                        </footer>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No hay artículos disponibles.</p>
+    {% endif %}
+</div>
+{% endblock %}

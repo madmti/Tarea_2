@@ -1,0 +1,51 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<div class="container is-fluid">
+    <div class="columns is-centered">
+        <div class="column is-half">
+            <h1 class="title">Registro</h1>
+            <form method="POST" action="/registro">
+                <div class="field">
+                    <label class="label">RUT</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="text" name="rut" placeholder="Ingrese su RUT" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="email" name="email" placeholder="Ingrese su correo electrónico" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Nombre</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="text" name="nombre" placeholder="Ingrese su nombre completo" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="label">Contraseña</label>
+                    <div class="control">
+                        <input autocomplete="off" class="input" type="password" name="contrasena" placeholder="Ingrese su contraseña" required>
+                    </div>
+                </div>
+
+                <div class="field is-grouped">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">Registrarse</button>
+                    </div>
+                    <div class="control">
+                        <a class="button is-light" href="/">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+            <br>
+            <br>
+        </div>
+    </div>
+</div>
+{% endblock %}

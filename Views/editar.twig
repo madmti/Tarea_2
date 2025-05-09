@@ -1,0 +1,58 @@
+{% extends "layouts/base.twig" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Editar información de cuenta</h1>
+
+        {% if user %}
+            <form method="POST" action="/editar_cuenta">
+
+                <!-- Nombre -->
+                <div class="field">
+                    <label class="label">Nombre</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nombre" value="{{ user.nombre|e }}" required maxlength="85">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control">
+                        <input class="input" type="email" name="email" value="{{ user.email|e }}" required maxlength="95">
+                    </div>
+                </div>
+
+                <!-- Contraseña actual -->
+                <div class="field">
+                    <label class="label">Contraseña actual</label>
+                    <div class="control">
+                        <input class="input" type="password" name="contrasena_actual" required>
+                    </div>
+                    <p class="help">Necesaria para confirmar los cambios.</p>
+                </div>
+
+                <!-- Nueva contraseña -->
+                <div class="field">
+                    <label class="label">Nueva contraseña (opcional)</label>
+                    <div class="control">
+                        <input class="input" type="password" name="nueva_contrasena">
+                    </div>
+                </div>
+
+                <!-- Botón -->
+                <div class="field mt-4">
+                    <div class="control">
+                        <button class="button is-primary" type="submit">Guardar cambios</button>
+                    </div>
+                </div>
+            </form>
+        {% else %}
+            <div class="notification is-warning">
+                No has iniciado sesión. <a href="/login">Haz clic aquí para ingresar</a>.
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

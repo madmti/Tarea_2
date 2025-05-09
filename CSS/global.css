@@ -3,3 +3,31 @@ body, html {
     padding: 0;
     font-family: Arial, sans-serif;
 }
+
+#guest-alert {
+    background-color: #aec6cf;
+    height: min-content;
+    padding: 10px;
+    color: #000;
+    font-size: 14px;
+}
+
+#temp-alert {
+    opacity: 0;
+    animation: FadeInOutFromTopAlert 3s ease-in-out;
+}
+
+@keyframes FadeInOutFromTopAlert {
+    0% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
