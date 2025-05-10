@@ -3,7 +3,7 @@
 | ROL         | Nombre          |
 |-------------|-----------------|
 | 202373037-8 | Matias Peñaloza |
-| Rol2        | Nombre2         |
+| 202373020-3 | Hans González   |
 
 ## Antes de empezar
 
