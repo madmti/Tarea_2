@@ -341,7 +341,7 @@ return function (App $app, Twig $twig) {
         return ResponseHelper::redirect($response, '/private/revisores?info=Revisor creado correctamente.');
     });
 
-    $app->post('/admin/revisores/editar/{id}', function ($request, $response, $args) {
+    $app->post('/private/revisores/editar/{id}', function ($request, $response, $args) {
         $pdo = $this->get('db');
         $data = $request->getParsedBody();
         $idUsuario = (int)$args['id'];
@@ -411,5 +411,23 @@ return function (App $app, Twig $twig) {
         $path = $section === 'revisores' ? '/private/asignaciones/revisores' : '/private/asignaciones/articulos';
 
         return ResponseHelper::redirect($response, $path . '?info=Asignación eliminada correctamente.');
+    });
+
+    $app->post('/private/asignar_art/{id_articulo}/revisor/{id_revisor}/{section}', function ($request, $response, $args) {
+        $pdo = $this->get('db');
+        $idArticulo = (int)$args['id_articulo'];
+        $idRevisor = (int)$args['id_revisor'];
+
+        if (empty($idArticulo) || empty($idRevisor)) {
+            return ResponseHelper::redirect($response, '/private/asignaciones/articulos?error=ID de artículo o revisor inválido.');
+        }
+
+        $res = Functions::asignarArticulo($pdo, $idArticulo, $idRevisor);
+        if (!$res) {
+            return ResponseHelper::redirect($response, '/private/asignaciones/articulos?error=Error al asignar el artículo.');
+        }
+        $path = $args['section'] === 'revisores' ? '/private/asignaciones/revisores' : '/private/asignaciones/articulos';
+
+        return ResponseHelper::redirect($response, $path . '?info=Asignación realizada correctamente.');
     });
 };

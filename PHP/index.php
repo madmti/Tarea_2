@@ -8,7 +8,14 @@ use DI\Container;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 use API\AuthMiddleware;
-
+use SHARED\AuthorizationLevel;
+use SHARED\AuthLevelRoute;
+use SHARED\Method;
+/**
+ * ==========================================================
+ *                    PDO para MySQL
+ * ==========================================================
+ */
 $container = new Container();
 $container->set('db', function () {
     $host     = getenv('MYSQL_HOST') ?: 'localhost';
@@ -24,18 +31,33 @@ $container->set('db', function () {
 
     return $pdo;
 });
-
+/**
+ * ==========================================================
+ *                 Proteccion de rutas
+ * ==========================================================
+ */
+$routes = [
+    new AuthLevelRoute('/private/.*', [Method::ALL], [AuthorizationLevel::ADMINISTRADOR]),
+    new AuthLevelRoute('/protected/mis_articulos.*', [Method::ALL], [AuthorizationLevel::CONTACTO, AuthorizationLevel::REVISOR]),
+    new AuthLevelRoute('/protected/publicar', [Method::ALL], [AuthorizationLevel::CONTACTO, AuthorizationLevel::REVISOR]),
+    new AuthLevelRoute('/protected/mis_revisiones.*', [Method::ALL], [AuthorizationLevel::REVISOR]),
+    new AuthLevelRoute('/protected/revisar.*', [Method::ALL], [AuthorizationLevel::REVISOR]),
+];
+/**
+ * ==========================================================
+ *                Inicializacion de App
+ * ==========================================================
+ */
 $twig = Twig::create('/var/views', ['cache' => false]);
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
-$app->add(new AuthMiddleware());
+$app->add(new AuthMiddleware($routes));
 $app->add(TwigMiddleware::create($app, $twig));
 $app->addBodyParsingMiddleware();
 
 $routes = require '/var/php/routes.php';
 $routes($app, $twig);
-
 
 $app->run();

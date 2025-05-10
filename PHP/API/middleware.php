@@ -2,7 +2,7 @@
 namespace API;
 
 require_once __DIR__ . '/responses.php';
-require_once __DIR__ . '/AuthLevelRouting.php';
+require __DIR__ . '/AuthLevelRouting.php';
 require_once __DIR__ . '/functions.php';
 
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -14,13 +14,16 @@ use Slim\Psr7\Factory\ResponseFactory;
 use SHARED\AuthorizationLevel;
 use SHARED\Method;
 use function SHARED\getAuthorizationLevel;
+use SHARED\routes;
 
 
 class AuthMiddleware {
     protected ResponseFactory $responseFactory;
+    protected array $routes;
 
-    public function __construct() {
+    public function __construct(array $routes) {
         $this->responseFactory = new ResponseFactory();
+        $this->routes = $routes;
     }
 
     public function __invoke(Request $request, RequestHandlerInterface $handler): Response {
@@ -29,8 +32,8 @@ class AuthMiddleware {
         if (!$method) {
             return ResponseHelper::r_error('Método HTTP no soportado.', 400);
         }
-        $routeAuthorizationLevel = getAuthorizationLevel($path, $method);
-        if ($routeAuthorizationLevel === AuthorizationLevel::GUEST) {
+        $routeAuthorizationLevels = getAuthorizationLevel($path, $method, $this->routes);
+        if (is_array($routeAuthorizationLevels) && in_array(AuthorizationLevel::GUEST, $routeAuthorizationLevels, true) || $routeAuthorizationLevels == AuthorizationLevel::GUEST) {
             return $handler->handle($request);
         }
         $token = Functions::ObtenerToken($request);
@@ -38,29 +41,39 @@ class AuthMiddleware {
             return ResponseHelper::r_error('Token no proporcionado.', 401);
         }
         $userLevel = $this->getAuthorizationLevelFromToken($token);
-        if (!$this->isAuthorized($routeAuthorizationLevel, $userLevel)) {
+        if (!$this->isAuthorized($routeAuthorizationLevels, $userLevel)) {
             return ResponseHelper::r_error('No autorizado.', 403);
         }
 
         return $handler->handle($request);
     }
 
-    public function isAuthorized(AuthorizationLevel $requiredLevel, AuthorizationLevel $userLevel): bool {
+    public function isAuthorized(array $requiredLevels, AuthorizationLevel $userLevel): bool {
         /**
          *        ADMINISTRADOR         | Menos Autoridad
          *     CONTACTO  |  REVISOR     | y acceso a todo
          *             GUEST            V
          */
-        switch ($requiredLevel) {
-            case AuthorizationLevel::ADMINISTRADOR:
-            return $userLevel === AuthorizationLevel::ADMINISTRADOR;
-            case AuthorizationLevel::REVISOR:
-            return $userLevel === AuthorizationLevel::REVISOR || $userLevel === AuthorizationLevel::ADMINISTRADOR;
-            case AuthorizationLevel::CONTACTO:
-            return $userLevel === AuthorizationLevel::CONTACTO || $userLevel === AuthorizationLevel::ADMINISTRADOR;
-            default:
-            return false;
+        foreach ($requiredLevels as $requiredLevel) {
+            switch ($requiredLevel) {
+                case AuthorizationLevel::ADMINISTRADOR:
+                    if ($userLevel === AuthorizationLevel::ADMINISTRADOR) {
+                        return true;
+                    }
+                    break;
+                case AuthorizationLevel::REVISOR:
+                    if ($userLevel === AuthorizationLevel::REVISOR || $userLevel === AuthorizationLevel::ADMINISTRADOR) {
+                        return true;
+                    }
+                    break;
+                case AuthorizationLevel::CONTACTO:
+                    if ($userLevel === AuthorizationLevel::CONTACTO || $userLevel === AuthorizationLevel::ADMINISTRADOR) {
+                        return true;
+                    }
+                    break;
+            }
         }
+        return false;
     }
 
     private function getAuthorizationLevelFromToken(string $token): AuthorizationLevel {

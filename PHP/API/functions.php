@@ -170,6 +170,22 @@ class Functions {
             return false;
         }
     }
+    /**
+     * Asignar un artículo a un revisor.
+     */
+    public static function asignarArticulo(\PDO $pdo, int $idArticulo, int $idRevisor): bool {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO revision (id_articulo, id_revisor) VALUES (:id_articulo, :id_revisor)");
+            $stmt->execute([
+                'id_articulo' => $idArticulo,
+                'id_revisor' => $idRevisor
+            ]);
+            return true;
+        } catch (\PDOException $e) {
+            error_log("Error al asignar artículo: " . $e->getMessage());
+            return false;
+        }
+    }
      /* ================================================================
      *                              READ
      * ================================================================
@@ -372,6 +388,16 @@ class Functions {
             return null;
         }
     }
+    public static function obtenerArticuloAutoresTopicosRevisores(\PDO $pdo, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM articulos_autores_topicos_revisores WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener artículos con autores, tópicos y revisores: " . $e->getMessage());
+            return null;
+        }
+    }
     /**
      * Obtener revisores asociados a artículos.
      */
@@ -393,6 +419,36 @@ class Functions {
             return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log("Error al obtener artículos: " . $e->getMessage());
+            return null;
+        }
+    }
+    public static function obtenerArticulosQueIncluyen(\PDO $pdo, array $ids_categorias): ?array {
+        try {
+            $placeholders = implode(',', array_map(fn($id) => ':id_' . $id, array_keys($ids_categorias)));
+            $query = "SELECT * FROM articulos_autores_topicos_revisores WHERE id_categoria IN ($placeholders)";
+            $stmt = $pdo->prepare($query);
+            foreach ($ids_categorias as $key => $id) {
+                $stmt->bindValue(':id_' . $key, $id, \PDO::PARAM_INT);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener artículos que incluyen: " . $e->getMessage());
+            return null;
+        }
+    }
+    public static function obtenerRevisoresQueIncluyen(\PDO $pdo, array $nombre_topicos): ?array {
+        try {
+            $placeholders = implode(',', array_map(fn($id) => ':nombre_' . $id, array_keys($nombre_topicos)));
+            $query = "SELECT * FROM revisores_topicos_articulos WHERE nombre_especialidad IN ($placeholders)";
+            $stmt = $pdo->prepare($query);
+            foreach ($nombre_topicos as $key => $nombre) {
+                $stmt->bindValue(':nombre_' . $key, $nombre, \PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener artículos que incluyen: " . $e->getMessage());
             return null;
         }
     }
@@ -711,12 +767,15 @@ class Functions {
             if (!in_array($revisor['nombre_especialidad'], $revisoresAgrupados[$revisor['id_usuario']]['topicos'])) {
                 $revisoresAgrupados[$revisor['id_usuario']]['topicos'][] = $revisor['nombre_especialidad'];
             }
-            $articulo = [
-                'id_articulo' => $revisor['id_articulo'],
-                'titulo' => $revisor['titulo'],
-                'estado' => $revisor['estado'],
-            ];
-            if (!in_array($articulo, $revisoresAgrupados[$revisor['id_usuario']]['articulos'])) {
+            $articulo = null;
+            if (isset($revisor['id_articulo'])) {
+                $articulo = [
+                    'id_articulo' => $revisor['id_articulo'],
+                    'titulo' => $revisor['titulo'],
+                    'estado' => $revisor['estado'],
+                ];
+            }
+            if ($articulo && !in_array($articulo, $revisoresAgrupados[$revisor['id_usuario']]['articulos'])) {
                 $revisoresAgrupados[$revisor['id_usuario']]['articulos'][] = $articulo;
             }
         }

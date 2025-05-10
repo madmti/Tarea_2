@@ -423,10 +423,18 @@ return function (App $app, Twig $twig) {
         $token = Functions::ObtenerToken($request);
         $user = Functions::verificarAuthUsuario($token);
 
+        $articulo = Functions::obtenerArticuloAutoresTopicosRevisores($pdo, $id_articulo) ?? [];
+        $articulo = Functions::agruparArticulosAutoresTopicosRevisores($articulo)[0];
+        $nombre_topicos = $articulo['topicos'] ?? [];
+        $revisores = Functions::obtenerRevisoresQueIncluyen($pdo, $nombre_topicos);
+        $revisores = Functions::agruparRevisoresTopicosArticulos($revisores);
+        
         return $twig->render($response, 'admin/art_to_rev.twig', [
             'user' => $user,
             'info' => $info,
             'error' => $error,
+            'articulo' => $articulo,
+            'revisores' => $revisores,
         ]);
     });
 
@@ -441,12 +449,27 @@ return function (App $app, Twig $twig) {
 
         $revisor = Functions::obtenerRevisorEspecialidad($pdo, $id_revisor) ?? [];
         $revisor = Functions::agruparRevisoresEspecialidad($revisor)[$id_revisor] ?? [];
+        $ids_categorias = array_map(function ($categoria) {
+            return $categoria['id_categoria'];
+        }, $revisor['especialidades'] ?? []);
+        $articulos = Functions::obtenerArticulosQueIncluyen($pdo, $ids_categorias) ?? [];
+        $articulos = Functions::agruparArticulosAutoresTopicosRevisores($articulos);
+
+        $articulo = array_filter($articulos, function ($articulo) {
+            return $articulo['id_articulo'] == 26;
+        });
+        if (!empty($articulo)) {
+            $articulo = array_values($articulo)[0];
+            print_r($articulo);
+        }
 
         return $twig->render($response, 'admin/rev_to_art.twig', [
             'user' => $user,
             'info' => $info,
             'error' => $error,
             'revisor' => $revisor,
+            'articulos' => $articulos,
+            'section' => 'revisores',
         ]);
     });
 };

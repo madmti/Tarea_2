@@ -9,6 +9,16 @@
             <h1 class="title">{{ articulo.titulo|e }}</h1>
             <p><strong>Resumen:</strong> {{ articulo.resumen|e }}</p>
             <p><strong>Fecha de envío:</strong> {{ articulo.fecha_envio|date('d-m-Y') }}</p>
+            <p><strong>Autores:</strong> 
+                {% for autor in articulo.autores %}
+                    <span class="tag is-link is-light mr-1">{{ autor }}</span>
+                {% endfor %}
+            </p>
+            <p><strong>Tópicos:</strong>
+                {% for topico in articulo.topicos %}
+                    <span class="tag is-success is-light mr-1">{{ topico }}</span>
+                {% endfor %}
+            </p>
         </div>
 
         <!-- Tabla de revisores -->
@@ -18,17 +28,47 @@
                 <tr>
                     <th>Nombre</th>
                     <th>Especialidades coincidentes</th>
+                    <th>Artículos ya asignados</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for rev in revisores %}
+                {% if articulo.id_articulo not in rev.articulos|map(art => art.id_articulo) %}
                     <tr>
-                        <!-- Info de los revisores + boton de asignar -->
+                        <td>{{ rev.nombre|e }}</td>
+
+                        <td>
+                            {% set coincidencias = [] %}
+                            {% for topico in rev.topicos %}
+                                {% if topico in articulo.topicos %}
+                                    {% set coincidencias = coincidencias|merge([topico]) %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if coincidencias|length > 0 %}
+                                {% for c in coincidencias %}
+                                    <span class="tag is-info is-light mr-1">{{ c }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="tag is-warning is-light">Sin coincidencias</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ rev.articulos|length }} asignado{{ rev.articulos|length == 1 ? '' : 's' }}
+                        </td>
+
+                        <td>
+                            <form method="POST" action="/private/asignar_art/{{ articulo.id_articulo }}/revisor/{{ rev.id_usuario }}/content">
+                                <button class="button is-primary is-small">Asignar</button>
+                            </form>
+                        </td>
                     </tr>
+                {% endif %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="has-text-centered">No se encontraron revisores compatibles.</td>
+                        <td colspan="4" class="has-text-centered">No se encontraron revisores compatibles.</td>
                     </tr>
                 {% endfor %}
             </tbody>

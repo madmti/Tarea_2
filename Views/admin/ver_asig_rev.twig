@@ -3,7 +3,7 @@
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1 class="title">Revisores</h1>
+        <h1 class="title">Revisores ({{ total_rev }})</h1>
         <table class="table is-fullwidth is-striped is-bordered">
             <thead>
                 <tr>
@@ -28,6 +28,7 @@
                             <td>{{ rev.topicos[i] ?? '' }}</td>
                             <td>{{ rev.articulos[i].titulo ?? '' }}</td>
                             <td>
+                            {% if rev.articulos[i].titulo %}
                                 {% if rev.articulos[i].estado is null %}
                                     <span class="tag is-warning">Pendiente</span>
                                 {% elseif rev.articulos[i].estado == 1 %}
@@ -35,11 +36,14 @@
                                 {% elseif rev.articulos[i].estado == 0 %}
                                     <span class="tag is-danger">Rechazado</span>
                                 {% endif %}
+                            {% endif %}
                             </td>
                             <td>
+                            {% if rev.articulos[i].titulo %}
                                 <form method="POST" action="/private/quitar_art/{{ rev.articulos[i].id_articulo }}/revisor/{{ rev.id_usuario }}/revisores">
                                     <button class="button is-small is-danger" type="submit">Quitar</button>
                                 </form>
+                            {% endif %}
                             </td>
                             {% if i == 0 %}
                             <td rowspan="{{ max_len }}">

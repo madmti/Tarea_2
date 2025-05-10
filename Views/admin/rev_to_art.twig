@@ -10,7 +10,7 @@
             <p><strong>Email:</strong> {{ revisor.email|e }}</p>
             <p><strong>Especialidades:</strong> 
                 {% for especialidad in revisor.especialidades %}
-                    <span class="tag is-info">{{ especialidad.nombre_categoria }}</span>
+                    <span class="tag is-info is-light mr-1">{{ especialidad.nombre_categoria }}</span>
                 {% endfor %}
             </p>
         </div>
@@ -22,14 +22,32 @@
                 <tr>
                     <th>Título</th>
                     <th>Tópicos</th>
+                    <th>Revisiones Asignadas</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for art in articulos %}
+                {% if revisor.id_usuario not in art.revisores|map(rev => rev.id_usuario) %}
                     <tr>
-                        <!-- Info de los articulos + boton de asignar -->
+                        <td>{{ art.titulo|e }}</td>
+                        <td>
+                            {% for topico in art.topicos %}
+                                <span class="tag is-success is-light mr-1">{{ topico }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {{ art.revisores|length }} asignado{{ art.revisores|length == 1 ? '' : 's' }}
+                        </td>
+                        <td>
+                            <form method="POST" action="/private/asignar_art/{{ art.id_articulo }}/revisor/{{ revisor.id_usuario }}/{{ section }}">
+                                <input type="hidden" name="id_articulo" value="{{ art.id_articulo }}">
+                                <input type="hidden" name="id_revisor" value="{{ revisor.id_usuario }}">
+                                <button class="button is-primary is-small">Asignar</button>
+                            </form>
+                        </td>
                     </tr>
+                {% endif %}
                 {% else %}
                     <tr>
                         <td colspan="3" class="has-text-centered">No hay artículos disponibles para este revisor.</td>

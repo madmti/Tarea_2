@@ -73,7 +73,43 @@ END$$
 
 DELIMITER ;
 
--- TODO calcular_aprobado_delete !!!!!!!!!!!!!!!!!!!!!!!!!!!!!<------------------------------------
+DELIMITER $$
+
+CREATE TRIGGER trigger_calcular_aprobado_delete
+AFTER DELETE ON revision
+FOR EACH ROW
+BEGIN
+    DECLARE total_revisiones INT;
+    DECLARE revisiones_aprobadas INT;
+    DECLARE revisiones_rechazadas INT;
+
+    -- Lógica común
+    SELECT COUNT(*) INTO total_revisiones
+    FROM revision
+    WHERE id_articulo = OLD.id_articulo;
+
+    SELECT COUNT(*) INTO revisiones_aprobadas
+    FROM revision
+    WHERE id_articulo = OLD.id_articulo AND estado = TRUE;
+
+    SELECT COUNT(*) INTO revisiones_rechazadas
+    FROM revision
+    WHERE id_articulo = OLD.id_articulo AND estado = FALSE;
+
+    IF total_revisiones = 3 THEN
+        IF revisiones_aprobadas = total_revisiones THEN
+            UPDATE articulo SET aprobado = TRUE WHERE id_articulo = OLD.id_articulo;
+        ELSEIF revisiones_rechazadas > 0 THEN
+            UPDATE articulo SET aprobado = FALSE WHERE id_articulo = OLD.id_articulo;
+        ELSE
+            UPDATE articulo SET aprobado = NULL WHERE id_articulo = OLD.id_articulo;
+        END IF;
+    ELSE
+        UPDATE articulo SET aprobado = NULL WHERE id_articulo = OLD.id_articulo;
+    END IF;
+END$$
+
+DELIMITER ;
 
 -- TRIIGER para verificar que el revisor no sea autor del articulo
 
@@ -104,6 +140,27 @@ BEGIN
     ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'El revisor no puede ser autor del artículo';
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE TRIGGER trigger_limitar_revisiones_insert
+BEFORE INSERT ON revision
+FOR EACH ROW
+BEGIN
+    DECLARE total_revisiones INT;
+
+    SELECT COUNT(*) INTO total_revisiones
+    FROM revision
+    WHERE id_articulo = NEW.id_articulo;
+
+    IF total_revisiones >= 3 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'No se pueden agregar más de 3 revisiones a un artículo';
     END IF;
 END$$
 

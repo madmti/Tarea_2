@@ -38,8 +38,10 @@ SELECT DISTINCT
     a.id_articulo,
     a.titulo,
     aut.nombre AS nombre_autor,
+    c.id_categoria,
     c.nombre AS nombre_categoria,
     rev.id_usuario AS id_usuario,
+    r.id_revisor AS id_revisor,
     rev.nombre AS nombre_revisor
 FROM articulos_pendientes a
 INNER JOIN propiedad p ON a.id_articulo = p.id_articulo
@@ -50,3 +52,20 @@ LEFT JOIN revision r ON a.id_articulo = r.id_articulo
 LEFT JOIN usuario rev ON r.id_revisor = rev.id_usuario
 WHERE aut.tipo = 'AUT'
 ORDER BY a.id_articulo, aut.nombre, c.nombre, rev.id_usuario;
+
+CREATE VIEW revisores_topicos_articulos AS
+SELECT 
+    r.id_usuario,
+    r.nombre,
+    c.id_categoria AS id_categoria,
+    c.nombre AS nombre_especialidad,
+    a.id_articulo,
+    a.titulo,
+    rev.estado
+FROM usuario r
+INNER JOIN especialidad e ON r.id_usuario = e.id_revisor
+INNER JOIN categoria c ON e.id_categoria = c.id_categoria
+LEFT JOIN revision rev ON r.id_usuario = rev.id_revisor
+LEFT JOIN articulo a ON rev.id_articulo = a.id_articulo
+WHERE r.tipo = 'REV'
+ORDER BY r.id_usuario, c.id_categoria, a.id_articulo;
