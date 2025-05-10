@@ -6,7 +6,6 @@ services:
       - "${PHP_PORT}:8080"
     volumes:
       - ./CSS:/var/www/html/public/css
-      - ./JS:/var/www/html/public/js
       - ./PHP:/var/php
       - ./PHP/index.php:/var/www/html/public/index.php
       - ./Views:/var/views
