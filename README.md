@@ -27,3 +27,8 @@ Para detener los servicios
 ```bash
 sudo make down
 ```
+
+### Suposiciones
+-no permitimos cambio de rut, ya que asi nos aseguramos de tener ruts unicos, y ademas, si es que lo ponemos en un contexto "laboral", no tiene sentido que un usuario cambie su rut ya que una persona normalmente no puede modificar su rut
+-No implementamos el registro de autores al momento de publicar, por que asi mantenemos un orden y simplicidad a la pagina
+-Se uso coomo identificador de sesion al correo ya que, el rut al ser unico, en caso de que se filtre facilita la suplantacion de identidad, por lo que el correo al poder llevar caracteres y combinaciones mas complejas es mas dificil su suplantacion

@@ -26,6 +26,28 @@
                 <a href="/editar_cuenta" class="button is-link">Editar información</a>
                 <a href="/logout" class="button is-danger">Cerrar sesión</a>
             </div>
+            
+            <div class="mt-6">
+                <h2 class="subtitle">Zona peligrosa</h2>
+                <div class="box has-background-danger-light">
+                    <p class="mb-3"><strong>Eliminar mi cuenta</strong></p>
+                    <p class="mb-4">Esta acción es permanente y no se puede deshacer. Se eliminarán todos tus datos.</p>
+                    
+                    <form id="deleteAccountForm" action="/eliminar_cuenta" method="post">
+                        <button type="button" class="button is-danger" onclick="confirmarEliminacion()">
+                            Eliminar mi cuenta
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <script>
+                function confirmarEliminacion() {
+                    if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) {
+                        document.getElementById('deleteAccountForm').submit();
+                    }
+                }
+            </script>
         {% else %}
             <div class="notification is-warning">
                 No has iniciado sesión. <a href="/login">Haz clic aquí para ingresar</a>.

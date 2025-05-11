@@ -74,6 +74,49 @@ return function (App $app, Twig $twig) {
         );
     });
 
+    $app->post('/eliminar_cuenta', function (Request $request, Response $response) {
+    $pdo = $this->get('db');
+    $token = Functions::ObtenerToken($request);
+    $user = Functions::verificarAuthUsuario($token);
+    
+    if (!$user) {
+        return ResponseHelper::redirect(
+            $response,
+            '/',
+        );
+    }
+    
+    $params = $request->getParsedBody();
+    $idUsuarioAEliminar = $params['id_usuario'] ?? $user['sub'];
+    
+    if ($idUsuarioAEliminar != $user['sub'] && $user['tipo'] !== 'ADM') {
+        return ResponseHelper::redirect(
+            $response,
+            '/mi_cuenta?error=No tienes permiso para eliminar esta cuenta.',
+        );
+    }
+    
+    $res = Functions::borrarUsuario($pdo, $idUsuarioAEliminar);
+    if (!$res) {
+        return ResponseHelper::redirect(
+            $response,
+            '/mi_cuenta?error=Error al eliminar la cuenta.',
+        );
+    }
+    if ($idUsuarioAEliminar == $user['sub']) {
+        $response = ResponseHelper::deleteTokenCookie($response);
+        return ResponseHelper::redirect(
+            $response,
+            '/',
+        );
+    } else {
+        return ResponseHelper::redirect(
+            $response,
+            '/',
+        );
+    }
+});
+
     $app->post('/login', function (Request $request, Response $response) {
         $pdo = $this->get('db');
         $data = $request->getParsedBody();
@@ -381,7 +424,7 @@ return function (App $app, Twig $twig) {
             return ResponseHelper::redirect($response, '/private/revisores?error=ID de revisor inválido.');
         }
     
-        $res = Functions::eliminarUsuario($pdo, $idUsuario);
+        $res = Functions::borrarUsuario($pdo, $idUsuario);
         if (!$res) {
             return ResponseHelper::redirect($response, '/private/revisores?error=Error al eliminar el revisor.');
         }
