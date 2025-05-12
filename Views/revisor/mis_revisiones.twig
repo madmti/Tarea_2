@@ -12,6 +12,7 @@
                 <thead>
                     <tr>
                         <th>Título del artículo</th>
+                        <th>Estado</th>
                         <th>Fecha de envío</th>
                         <th>Fecha de asignación</th>
                         <th>Acción</th>
@@ -21,10 +22,25 @@
                     {% for rev in revisiones %}
                         <tr>
                             <td>{{ rev.titulo_articulo|e }}</td>
+                            <td>
+                                {% if rev.estado is null %}
+                                    <span class="tag is-warning">Pendiente</span>
+                                {% elseif rev.estado == false %}
+                                    <span class="tag is-danger">Rechazado</span>
+                                {% elseif rev.estado == true %}
+                                    <span class="tag is-success">Aprobado</span>
+                                {% else %}
+                                    <span class="tag">Desconocido</span>
+                                {% endif %}
+                            </td>
                             <td>{{ rev.fecha_envio|date('d-m-Y') }}</td>
                             <td>{{ rev.fecha_emision|date('d-m-Y') }}</td>
                             <td>
-                                <a class="button is-small is-link" href="/protected/revisar/{{ rev.id_articulo }}">Revisar</a>
+                                {% if rev.estado is null %}
+                                    <a class="button is-small is-link" href="/protected/revisar/{{ rev.id_articulo }}">Revisar</a>
+                                {% else %}
+                                    <a class="button is-small is-info" href="/protected/revision/{{ rev.id_articulo }}">Ver revisión</a>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

@@ -29,7 +29,7 @@
             <tbody>
                 {% for art in articulos %}
                 {% if revisor.id_usuario not in art.revisores|map(rev => rev.id_usuario) %}
-                    <tr>
+                    <tr class="{% if art.revisores|length < 2 %} has-background-danger-light{% endif %}">
                         <td>{{ art.titulo|e }}</td>
                         <td>
                             {% for topico in art.topicos %}

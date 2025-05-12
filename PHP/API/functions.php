@@ -452,6 +452,19 @@ class Functions {
             return null;
         }
     }
+    public static function obtenerRevision(\PDO $pdo, int $idRevisor, int $idArticulo): ?array {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM revision WHERE id_revisor = :id_revisor AND id_articulo = :id_articulo");
+            $stmt->execute([
+                'id_revisor' => $idRevisor,
+                'id_articulo' => $idArticulo
+            ]);
+            return $stmt->fetch(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            error_log("Error al obtener revisión: " . $e->getMessage());
+            return null;
+        }
+    }
     /**
      * ================================================================
      *                              UPDATE

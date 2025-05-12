@@ -27,7 +27,7 @@
                     {% set max_len = l1 > l2 and l1 > l3 ? l1 : (l2 > l3 ? l2 : l3) %}
 
                     {% for i in 0..(max_len - 1) %}
-                        <tr {% if i == 0 %}class="separador-top"{% elseif i == max_len - 1 %}class="separador-bottom"{% else %}class="separador"{% endif %}>
+                        <tr class="{% if i == 0 %}separador-top{% elseif i == max_len - 1 %}separador-bottom{% else %}separador{% endif %}{% if art.revisores|length < 2 %} has-background-danger-light{% endif %}">
                             {% if i == 0 %}
                                 <td rowspan="{{ max_len }}">{{ art.id_articulo }}</td>
                                 <td rowspan="{{ max_len }}">{{ art.titulo }}</td>

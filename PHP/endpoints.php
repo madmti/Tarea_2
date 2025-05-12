@@ -196,8 +196,6 @@ return function (App $app, Twig $twig) {
     
         $contacto = $data['autor_contacto'] ?? null;
         if (!$contacto || !in_array($contacto, $data['autores'])) {
-            print_r($contacto);
-            print_r($data['autores']);
             return ResponseHelper::redirect($response, '/protected/publicar?error=Debe seleccionar un autor de contacto válido.');
         }
 
@@ -262,7 +260,6 @@ return function (App $app, Twig $twig) {
 
         $argumentos = json_decode($argumentosJson, true);
         if (!is_array($argumentos) || count($argumentos) < 1) {
-            print_r($argumentos);
             return ResponseHelper::redirect($response, "/protected/revisar/$idArticulo?msg=Los argumentos deben ser válidos y contener al menos uno");
         }
 

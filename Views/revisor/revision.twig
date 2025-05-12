@@ -1,0 +1,43 @@
+{% extends "layouts/base.twig" %}
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Detalles de la Revisión</h1>
+
+        <div class="box">
+            <h2 class="subtitle">Artículo evaluado</h2>
+            <p><strong>Título:</strong> {{ articulo.titulo|e }}</p>
+            <p><strong>Resumen:</strong> {{ articulo.resumen|e }}</p>
+            <p><strong>Fecha de envío:</strong> {{ articulo.fecha_envio }}</p>
+        </div>
+
+        <div class="box">
+            <h2 class="subtitle">Evaluación</h2>
+            <p><strong>Estado:</strong>
+                {% if revision.estado == true %}
+                    <span class="tag is-success">Aprobado</span>
+                {% elseif revision.estado == false %}
+                    <span class="tag is-danger">Rechazado</span>
+                {% else %}
+                    <span class="tag is-warning">Pendiente</span>
+                {% endif %}
+            </p>
+            <p><strong>Calidad Técnica:</strong> {{ revision.calidad_tecnica }}</p>
+            <p><strong>Originalidad:</strong> {{ revision.originalidad }}</p>
+            <p><strong>Valoración Global:</strong> {{ revision.valoracion_global }}</p>
+            <p><strong>Fecha de emisión:</strong> {{ revision.fecha_emision }}</p>
+
+            {% if revision.argumentos %}
+                <h3 class="mt-4 subtitle is-6">Argumentos del Revisor:</h3>
+                <ul>
+                    {% for clave, valor in revision.argumentos %}
+                        <li><strong>{{ clave|capitalize }}:</strong> {{ valor }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <a href="/protected/mis_revisiones" class="button is-light">Volver</a>
+    </div>
+</section>
+{% endblock %}

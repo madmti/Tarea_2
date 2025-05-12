@@ -305,6 +305,27 @@ return function (App $app, Twig $twig) {
             'info' => $info,
         ]);
     });
+
+    $app->get('/protected/revision/{id}', function (Request $request, Response $response, $args) use ($twig) {
+        $pdo = $this->get('db');
+        $queryParams = $request->getQueryParams();
+        $error = $queryParams['error'] ?? null;
+        $info = $queryParams['info'] ?? null;
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+
+        $revision = Functions::obtenerRevision($pdo, $user['sub'], $args['id']);
+        $articulo = Functions::obtenerArticuloCompleto($pdo, $revision['id_articulo']);
+        $revision['argumentos'] = json_decode($revision['argumentos'], true);
+
+        return $twig->render($response, 'revisor/revision.twig', [
+            'user' => $user,
+            'revision' => $revision,
+            'articulo' => $articulo,
+            'error' => $error,
+            'info' => $info,
+        ]);
+    });
 /**
  * ===================================================================================================
  *                                     ADMINISTRADORES
@@ -454,14 +475,6 @@ return function (App $app, Twig $twig) {
         }, $revisor['especialidades'] ?? []);
         $articulos = Functions::obtenerArticulosQueIncluyen($pdo, $ids_categorias) ?? [];
         $articulos = Functions::agruparArticulosAutoresTopicosRevisores($articulos);
-
-        $articulo = array_filter($articulos, function ($articulo) {
-            return $articulo['id_articulo'] == 26;
-        });
-        if (!empty($articulo)) {
-            $articulo = array_values($articulo)[0];
-            print_r($articulo);
-        }
 
         return $twig->render($response, 'admin/rev_to_art.twig', [
             'user' => $user,

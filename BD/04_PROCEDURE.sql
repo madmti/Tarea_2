@@ -109,7 +109,7 @@ BEGIN
         r.estado
     FROM revision r
     JOIN articulo a ON r.id_articulo = a.id_articulo
-    WHERE r.id_revisor = p_id_revisor AND r.estado IS NULL
+    WHERE r.id_revisor = p_id_revisor
     ORDER BY a.fecha_envio DESC, r.fecha_emision DESC;
 END$$
 
