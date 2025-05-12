@@ -3,7 +3,7 @@
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1 class="title">Mis Revisiones</h1>
+        <h1 class="title">Mis Revisiones (Pendientes)</h1>
 
         {% if total > 0 %}
             <p class="subtitle">Tienes {{ total }} revisión{{ total == 1 ? '' : 'es' }} pendiente{{ total == 1 ? '' : 's' }}.</p>
@@ -32,7 +32,7 @@
             </table>
         {% else %}
             <div class="notification is-info">
-                No tienes revisiones asignadas por el momento.
+                No tienes revisiones pendientes por el momento.
             </div>
         {% endif %}
     </div>

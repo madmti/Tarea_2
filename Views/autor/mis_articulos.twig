@@ -30,13 +30,22 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if articulo.aprobado is null %}                                
-                                {% if articulo.editable %}
-                                <a href="/protected/mis_articulos/{{ articulo.id_articulo }}/editar" class="button is-small is-primary">Editar</a>
+                            <div class="field is-grouped">
+                                {% if articulo.aprobado is null %}                                
+                                    {% if articulo.editable %}
+                                        <p class="control">
+                                            <a href="/protected/mis_articulos/{{ articulo.id_articulo }}/editar" class="button is-small is-primary">Editar</a>
+                                        </p>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="control">
+                                        <a href="/protected/mis_articulos/{{ articulo.id_articulo }}" class="button is-small is-info">Ver Detalles</a>
+                                    </p>
                                 {% endif %}
-                            {% else %}
-                                <a href="/protected/mis_articulos/{{ articulo.id_articulo }}" class="button is-small is-info">Ver Detalles</a>
-                            {% endif %}
+                                <p class="control">
+                                    <a href="/protected/mis_articulos/{{ articulo.id_articulo }}/eliminar" class="button is-small is-danger">Eliminar</a>
+                                </p>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}

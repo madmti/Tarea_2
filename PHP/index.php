@@ -42,6 +42,8 @@ $routes = [
     new AuthLevelRoute('/protected/publicar', [Method::ALL], [AuthorizationLevel::CONTACTO, AuthorizationLevel::REVISOR]),
     new AuthLevelRoute('/protected/mis_revisiones.*', [Method::ALL], [AuthorizationLevel::REVISOR]),
     new AuthLevelRoute('/protected/revisar.*', [Method::ALL], [AuthorizationLevel::REVISOR]),
+    new AuthLevelRoute('/protected/revisar.*', [Method::ALL], [AuthorizationLevel::REVISOR]),
+    new AuthLevelRoute('/protected/eliminar_cuenta', [Method::ALL], [AuthorizationLevel::REVISOR, AuthorizationLevel::CONTACTO]),
 ];
 /**
  * ==========================================================

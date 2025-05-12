@@ -591,11 +591,12 @@ class Functions {
     /**
      * Eliminar un artículo por su ID.
      */
-    public static function eliminarArticulo(\PDO $pdo, int $idArticulo): bool {
+    public static function eliminarArticulo(\PDO $pdo, int $idArticulo, int $idAutor): bool {
         try {
-            $stmt = $pdo->prepare("DELETE FROM articulo WHERE id_articulo = :id_articulo");
+            $stmt = $pdo->prepare("CALL eliminar_articulo(:id_articulo, :id_autor)");
             $stmt->execute([
-                'id_articulo' => $idArticulo
+                'id_articulo' => $idArticulo,
+                'id_autor' => $idAutor
             ]);
             return true;
         } catch (\PDOException $e) {
@@ -619,65 +620,6 @@ class Functions {
         }
     }
     /**
-     * Borrar un usuario y sus relaciones por su ID.
-     */
-    public static function borrarusuario(\PDO $pdo, int $idUsuario): bool {
-        try {
-            $pdo->beginTransaction();
-            $stmt = $pdo->prepare("SELECT tipo FROM usuario WHERE id_usuario = :id_usuario");
-            $stmt->execute(['id_usuario' => $idUsuario]);
-            $usuario = $stmt->fetch(\PDO::FETCH_ASSOC);
-        
-            if (!$usuario) {
-                $pdo->rollBack();
-                return false;
-            }
-        
-            $tipoUsuario = $usuario['tipo'];
-        
-            if ($tipoUsuario === 'REV') {
-                // Para revisores, eliminar primero las revisiones asignadas
-                // Como hay un ON DELETE RESTRICT, hay que borrar estos registros
-                $stmt = $pdo->prepare("DELETE FROM revision WHERE id_revisor = :id_revisor");
-                $stmt->execute(['id_revisor' => $idUsuario]);
-            }
-            
-            if ($tipoUsuario === 'AUT') {
-                // Para autores, como hay un ON DELETE RESTRICT, hay que borrar estos registros
-                // Vemos si el autor tiene artículos
-                $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM propiedad WHERE id_autor = :id_autor");
-                $stmt->execute(['id_autor' => $idUsuario]);
-                $count = $stmt->fetch(\PDO::FETCH_ASSOC)['total'];
-            
-                if ($count > 0) {
-                    $stmt = $pdo->prepare("DELETE FROM propiedad WHERE id_autor = :id_autor");
-                    $stmt->execute(['id_autor' => $idUsuario]);
-                
-            }
-        }
-        
-        // Eliminamos el usuario
-        $stmt = $pdo->prepare("DELETE FROM usuario WHERE id_usuario = :id_usuario");
-        $resultado = $stmt->execute(['id_usuario' => $idUsuario]);
-        
-        if ($resultado) {
-            $pdo->commit();
-            return true;
-        } else {
-            $pdo->rollBack();
-            return false;
-        }
-        
-    } catch (\PDOException $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        error_log("Error al eliminar usuario: " . $e->getMessage());
-        return false;
-    }
-    }
-
-    /**
      * Quitar la asignación de un revisor a un artículo.
      */
     public static function quitarAsignacion(\PDO $pdo, int $idArticulo, int $idRevisor): bool {
@@ -693,6 +635,7 @@ class Functions {
             return false;
         }
     }
+
     /**
      * ================================================================
      *                             MISC

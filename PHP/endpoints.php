@@ -74,47 +74,26 @@ return function (App $app, Twig $twig) {
         );
     });
 
-    $app->post('/eliminar_cuenta', function (Request $request, Response $response) {
+    $app->post('/protected/eliminar_cuenta', function (Request $request, Response $response) {
     $pdo = $this->get('db');
     $token = Functions::ObtenerToken($request);
     $user = Functions::verificarAuthUsuario($token);
+
+    $idUsuario = $user['sub'];
     
-    if (!$user) {
-        return ResponseHelper::redirect(
-            $response,
-            '/',
-        );
-    }
-    
-    $params = $request->getParsedBody();
-    $idUsuarioAEliminar = $params['id_usuario'] ?? $user['sub'];
-    
-    if ($idUsuarioAEliminar != $user['sub'] && $user['tipo'] !== 'ADM') {
-        return ResponseHelper::redirect(
-            $response,
-            '/mi_cuenta?error=No tienes permiso para eliminar esta cuenta.',
-        );
-    }
-    
-    $res = Functions::borrarUsuario($pdo, $idUsuarioAEliminar);
+    $res = Functions::eliminarUsuario($pdo, $idUsuario);
     if (!$res) {
         return ResponseHelper::redirect(
             $response,
             '/mi_cuenta?error=Error al eliminar la cuenta.',
         );
     }
-    if ($idUsuarioAEliminar == $user['sub']) {
-        $response = ResponseHelper::deleteTokenCookie($response);
-        return ResponseHelper::redirect(
-            $response,
-            '/',
-        );
-    } else {
-        return ResponseHelper::redirect(
-            $response,
-            '/',
-        );
-    }
+
+    $response = ResponseHelper::deleteTokenCookie($response);
+    return ResponseHelper::redirect(
+        $response,
+        '/?info=Cuenta eliminada correctamente.',
+    );
 });
 
     $app->post('/login', function (Request $request, Response $response) {
@@ -343,6 +322,26 @@ return function (App $app, Twig $twig) {
         return ResponseHelper::redirect($response, '/protected/mis_articulos?info=Artículo actualizado correctamente.');
     });
 
+    $app->get('/protected/mis_articulos/{id}/eliminar', function ($request, $response, $args) {
+        $pdo = $this->get('db');
+        $idArticulo = (int)$args['id'];
+
+        $token = Functions::ObtenerToken($request);
+        $user = Functions::verificarAuthUsuario($token);
+        $idUsuario = $user['sub'];
+    
+        if (empty($idArticulo)) {
+            return ResponseHelper::redirect($response, '/protected/mis_articulos?error=ID de artículo inválido.');
+        }
+    
+        $res = Functions::eliminarArticulo($pdo, $idArticulo, $idUsuario);
+        if (!$res) {
+            return ResponseHelper::redirect($response, '/protected/mis_articulos?error=Error al eliminar el artículo.');
+        }
+    
+        return ResponseHelper::redirect($response, '/protected/mis_articulos?info=Artículo eliminado correctamente.');
+    });
+
 /**
  * ===================================================================================================
  *                                        ADM -> REVISORES
@@ -424,7 +423,7 @@ return function (App $app, Twig $twig) {
             return ResponseHelper::redirect($response, '/private/revisores?error=ID de revisor inválido.');
         }
     
-        $res = Functions::borrarUsuario($pdo, $idUsuario);
+        $res = Functions::eliminarUsuario($pdo, $idUsuario);
         if (!$res) {
             return ResponseHelper::redirect($response, '/private/revisores?error=Error al eliminar el revisor.');
         }

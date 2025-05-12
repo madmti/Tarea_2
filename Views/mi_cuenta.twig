@@ -26,26 +26,65 @@
                 <a href="/editar_cuenta" class="button is-link">Editar información</a>
                 <a href="/logout" class="button is-danger">Cerrar sesión</a>
             </div>
-            
+
             <div class="mt-6">
                 <h2 class="subtitle">Zona peligrosa</h2>
                 <div class="box has-background-danger-light">
                     <p class="mb-3"><strong>Eliminar mi cuenta</strong></p>
-                    <p class="mb-4">Esta acción es permanente y no se puede deshacer. Se eliminarán todos tus datos.</p>
-                    
-                    <form id="deleteAccountForm" action="/eliminar_cuenta" method="post">
-                        <button type="button" class="button is-danger" onclick="confirmarEliminacion()">
-                            Eliminar mi cuenta
-                        </button>
-                    </form>
+                    {% if user.tipo == 'AUT' %}
+                    <p>Para eliminar tu cuenta debes cumplir con los siguientes requisitos:</p>
+
+                    <div class="content">
+                        <ul>
+                            <li>No formar parte de ningún artículo</li>
+                        </ul>
+                    </div>
+
+                    <p>En caso contrario, deberás contactar a los debidos autores de contacto para que te eliminen aquellos artículos.</p>
+                    {% elseif  user.tipo == 'REV' %}
+                    <p>Para eliminar tu cuenta debes cumplir con los siguientes requisitos:</p>
+
+                    <div class="content">
+                        <ul>
+                            <li>Contar con el permiso de tu jefe de comite</li>
+                            <li>No contar con ninguna revision</li>
+                        </ul>
+                    </div>
+
+                    <p>En caso contrario, deberás contactar a tu jefe de comite correspondiente para que este quite tus revisiones asignadas.</p>
+                    {% endif %}
+                    <p class="has-text-danger mt-4">Esta acción es permanente y no se puede deshacer.</p>
+                    <button class="button is-danger mt-4" onclick="abrirModal()">Eliminar mi cuenta</button>
                 </div>
             </div>
-            
+
+            {# Modal Bulma #}
+            <div class="modal" id="modalEliminar">
+                <div class="modal-background"></div>
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title">Confirmar eliminación</p>
+                        <button class="delete" aria-label="close" onclick="cerrarModal()"></button>
+                    </header>
+                    <section class="modal-card-body">
+                        ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.
+                    </section>
+                    <footer class="modal-card-foot">
+                        <form id="deleteAccountForm" action="/protected/eliminar_cuenta" method="post">
+                            <button type="submit" class="button is-danger">Sí, eliminar</button>
+                            <button type="button" class="button" onclick="cerrarModal()">Cancelar</button>
+                        </form>
+                    </footer>
+                </div>
+            </div>
+
             <script>
-                function confirmarEliminacion() {
-                    if (confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) {
-                        document.getElementById('deleteAccountForm').submit();
-                    }
+                function abrirModal() {
+                    document.getElementById('modalEliminar').classList.add('is-active');
+                }
+
+                function cerrarModal() {
+                    document.getElementById('modalEliminar').classList.remove('is-active');
                 }
             </script>
         {% else %}
