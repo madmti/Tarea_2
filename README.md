@@ -20,7 +20,7 @@ Iniciar sesion con email tiene mas sentido ya que apesar de no ser el maximo dis
 ## Instrucciones de Ejecucion
 Generar archivo de poblacion
 ```bash
-sudo make populate
+make populate
 ```
 
 Levantar los servicios
