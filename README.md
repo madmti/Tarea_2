@@ -17,6 +17,14 @@ Aun que al publicar un articulo se manden las credenciales de usuario por email,
 ### ¿Porque iniciar sesion con email y no RUT o id_usuario?
 Iniciar sesion con email tiene mas sentido ya que apesar de no ser el maximo distintivo de una persona, en general es el dato proporcionado en las distintas vistas (para guest, autor, revisor y admin) que permite identificar a un usuario y entrar en conctacto con el.
 
+### ¿Como un revisor puede ser autor de un articulo?
+En la plataforma esta permitido que tanto autores como revisores puedan publicar articulos, a pesar de que USUARIO.TIPO determina si se es autor, existe la VIEW PROPIETARIOS que determina si algun usuario es parte de los escritores de algun articulo (tabla PROPIEDAD). De esta manera un revisor puede publicar y ver sus articulos sin ser un autor.
+
+## Requerimientos
+- Docker (docker-compose o desktop)
+- Python 3 (+ faker y bcrypt)
+- GNU Make
+
 ## Instrucciones de Ejecucion
 Generar archivo de poblacion
 ```bash
