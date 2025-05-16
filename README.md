@@ -11,6 +11,8 @@ Se deben aclarar los siguientes puntos:
 ### ¿No puedo cambiar mi RUT?
 El RUT es un identificador que no cambia en una misma persona, por lo que en caso de querer cambiar el RUT se debera crear otra cuenta.
 
+**Caso especial**: Los administradores pueden cambiar el RUT de los revisores, ya que son autoridad.
+
 ### ¿Porque se puede registrar un autor sin publicar un articulo?
 Aun que al publicar un articulo se manden las credenciales de usuario por email, es mas sensato crear una cuenta antes de publicar un articulo, ya que debiese de existir la entidad autor antes que el articulo del cual es propietario y para evitar registros de usuario en masa.
 
@@ -44,4 +46,10 @@ Finalmente los servicios estaran expuestos en las siguientes URL's
 Para detener los servicios
 ```bash
 sudo make down
+```
+
+### Clean
+Para eliminar los datos de *mysql*
+```bash
+sudo make clean-mysql
 ```
