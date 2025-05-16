@@ -715,16 +715,32 @@ class Functions {
             return false;
         }
     }
-    public static function asignarRevisores(\PDO $pdo, int $idArticulo): bool {
+    public static function asignarRevisores(\PDO $pdo, int $idArticulo, int $nRevisores): bool {
         try {
-            $stmt = $pdo->prepare("CALL asignar_revisores(:id_articulo)");
-            $stmt->execute(['id_articulo' => $idArticulo]);
+            $stmt = $pdo->prepare("CALL asignar_revisores(:id_articulo, :n_revisores)");
+            $stmt->execute([
+                'id_articulo' => $idArticulo,
+                'n_revisores' => $nRevisores
+            ]);
             return true;
         } catch (\PDOException $e) {
             error_log("Error al asignar revisores: " . $e->getMessage());
             return false;
         }
     }
+
+    public static function obtenerNumRevisiones(\PDO $pdo, int $idArticulo): ?int {
+        try {
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS n_revisiones FROM revision WHERE id_articulo = :id_articulo");
+            $stmt->execute(['id_articulo' => $idArticulo]);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $result ? (int)$result['n_revisiones'] : null;
+        } catch (\PDOException $e) {
+            error_log("Error al obtener número de revisiones: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public static function agruparRevisoresEspecialidad(array $revisores): array {
         $revisoresEspecialidad = [];
         foreach ($revisores as $revisor) {

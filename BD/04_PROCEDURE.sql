@@ -205,9 +205,13 @@ END$$
 
 
 CREATE PROCEDURE asignar_revisores(
-    IN p_id_articulo INT
+    IN p_id_articulo INT,
+    IN p_limit INT
 )
 BEGIN
+    -- Establecer como limite 3 revisores para asignar
+    DECLARE v_limit INT;
+    SET v_limit = LEAST(p_limit, 3);
     -- Asignar las revisiones para los 3 revisores seleccionados
     INSERT INTO revision (id_articulo, id_revisor)
     SELECT 
@@ -226,6 +230,12 @@ BEGIN
               FROM propiedad p
               WHERE p.id_articulo = p_id_articulo
           )
+          AND r.id_usuario NOT IN (
+              -- Revisores que ya tienen el articulo asignado
+              SELECT rev.id_revisor
+              FROM revision rev
+              WHERE rev.id_articulo = p_id_articulo
+          )
           AND EXISTS (
               -- Hacer coincidir topicos-especialidades
               SELECT 1
@@ -236,7 +246,7 @@ BEGIN
           )
         GROUP BY r.id_usuario
         ORDER BY COUNT(rev.id_articulo) ASC
-        LIMIT 3
+        LIMIT p_limit
     ) AS revisores_seleccionados;
 END$$
 

@@ -46,5 +46,15 @@
             <a href="/private/revisores/nuevo" class="button is-primary">+ Alta</a>
         </div>
     </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('info') === 'Revisor eliminado correctamente.') {
+            alert('Se ha enviado un correo al revisor para notificarle que ha sido eliminado.');
+        } else if (params.get('info') === 'Revisor actualizado correctamente.') {
+            alert('Se ha enviado un correo al revisor para notificarle que ha sido actualizado.');
+        } else if (params.get('info') === 'Revisor creado correctamente.') {
+            alert('Se ha enviado un correo al revisor para notificarle que ha sido creado.');
+        }
+    </script>
 </section>
 {% endblock %}

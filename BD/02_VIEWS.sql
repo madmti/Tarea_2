@@ -50,7 +50,6 @@ INNER JOIN topico t ON a.id_articulo = t.id_articulo
 INNER JOIN categoria c ON t.id_categoria = c.id_categoria
 LEFT JOIN revision r ON a.id_articulo = r.id_articulo
 LEFT JOIN usuario rev ON r.id_revisor = rev.id_usuario
-WHERE aut.tipo = 'AUT'
 ORDER BY a.id_articulo, aut.nombre, c.nombre, rev.id_usuario;
 
 CREATE VIEW revisores_topicos_articulos AS

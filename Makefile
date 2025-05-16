@@ -25,5 +25,8 @@ restart-mysql:
 	docker-compose -f $(COMPOSE_FILE) down mysql
 	docker-compose -f $(COMPOSE_FILE) up --build -d mysql
 
+clean-mysql:
+	rm -rf ./__mysql_data__/*
+
 populate:
 	python -u Populate/main.py

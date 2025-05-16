@@ -223,11 +223,6 @@ return function (App $app, Twig $twig) {
             return ResponseHelper::redirect($response, '/protected/publicar?error=Error al insertar los autores.');
         }
 
-        $res_revs = Functions::asignarRevisores($pdo, $idArticulo);
-        if (!$res_revs) {
-            // TODO AVISAR: No se asignaron revisores, pero el artículo se creó correctamente.
-        }
-
         return ResponseHelper::redirect($response, '/protected/mis_articulos?info=Correo enviado con las credenciales.');
     });
 
@@ -337,6 +332,28 @@ return function (App $app, Twig $twig) {
         }
     
         return ResponseHelper::redirect($response, '/protected/mis_articulos?info=Artículo eliminado correctamente.');
+    });
+
+    $app->get('/private/asignar_automatico/{id_articulo}', function ($request, $response, $args) {
+        $pdo = $this->get('db');
+        $idArticulo = (int)$args['id_articulo'];
+        $nRevisores = Functions::obtenerNumRevisiones($pdo, $idArticulo);
+        $diff = 3 - $nRevisores;
+
+        if ($diff <= 0) {
+            return ResponseHelper::redirect($response, '/private/asignaciones/articulos?error=El artículo ya tiene 3 revisores asignados.');
+        }
+
+        if (empty($idArticulo)) {
+            return ResponseHelper::redirect($response, '/private/asignaciones/articulos?error=ID de artículo inválido.');
+        }
+
+        $res_revs = Functions::asignarRevisores($pdo, $idArticulo, $diff);
+        if (!$res_revs) {
+            return ResponseHelper::redirect($response, '/private/asignaciones/articulos?error=Error al asignar revisores automaticamente.');
+        }
+
+        return ResponseHelper::redirect($response, '/private/asignaciones/articulos?info=Asignación automática realizada correctamente.');
     });
 
 /**

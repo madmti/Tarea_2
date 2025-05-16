@@ -3,10 +3,10 @@
 {% block content %}
 <section class="section">
     <div class="container">
-        <h1 class="title">Mis Revisiones (Pendientes)</h1>
+        <h1 class="title">Mis Revisiones</h1>
 
         {% if total > 0 %}
-            <p class="subtitle">Tienes {{ total }} revisión{{ total == 1 ? '' : 'es' }} pendiente{{ total == 1 ? '' : 's' }}.</p>
+            <p class="subtitle">Tienes {{ total }} revisión{{ total == 1 ? '' : 'es' }} asignada{{ total == 1 ? '' : 's' }}.</p>
 
             <table class="table is-fullwidth is-bordered is-striped mt-4">
                 <thead>

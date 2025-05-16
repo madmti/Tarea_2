@@ -44,9 +44,26 @@
                             </td>
                             {% if i == 0 %}
                             <td class="has-background-info-light" rowspan="{{ max_len }}">
-                            <a class="button is-small is-info" href="/private/asignar_rev/{{ art.id_articulo }}">
-                                Asignar Revisor
-                            </a>
+                                <div class="dropdown is-hoverable is-right">
+                                    <div class="dropdown-trigger">
+                                        <button class="button is-small is-info" aria-haspopup="true" aria-controls="dropdown-menu-{{ art.id_articulo }}">
+                                            <span>Asignar</span>
+                                            <span class="icon is-small">
+                                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div class="dropdown-menu" id="dropdown-menu-{{ art.id_articulo }}" role="menu">
+                                        <div class="dropdown-content">
+                                            <a href="/private/asignar_rev/{{ art.id_articulo }}" class="dropdown-item">
+                                                Revisor
+                                            </a>
+                                            <a href="/private/asignar_automatico/{{ art.id_articulo }}" class="dropdown-item">
+                                                Automatico
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>

@@ -60,10 +60,6 @@ BEGIN
     END IF;
 END$$
 
-
-
-
-
 CREATE TRIGGER trigger_limitar_revisiones_insert
 BEFORE INSERT ON revision
 FOR EACH ROW
