@@ -13,28 +13,17 @@ class ResponseHelper {
             ->withStatus($statusCode);
     }
 
-    public static function error(Response $response, string $message, int $statusCode = 400): Response {
-        $data = ['error' => $message];
-        return self::json($response, $data, $statusCode);
-    }
-
-    public static function success(Response $response, string $message, array $extraData = []): Response {
-        $data = array_merge(['success' => $message], $extraData);
-        return self::json($response, $data, 200);
-    }
-
     public static function redirect(Response $response, string $url, int $statusCode = 302): Response {
         return $response
             ->withHeader('Location', $url)
             ->withStatus($statusCode);
     }
 
-    public static function r_error(string $message, int $status = 400): Response {
-        $factory = new ResponseFactory();
-        $response = $factory->createResponse();
-        return self::error($response, $message, $status);
-    }
-
+    /**
+     * ================================================================
+     *                              TOKEN
+     * ================================================================
+     */
     public static function setTokenCookie(Response $response, string $token, string $name = 'token', int $lifetimeSeconds = 3600): Response {
         $expires = gmdate('D, d-M-Y H:i:s T', time() + $lifetimeSeconds);
 
