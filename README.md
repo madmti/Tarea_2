@@ -42,6 +42,12 @@ Finalmente los servicios estaran expuestos en las siguientes URL's
 - Aplicación web: [http://localhost:8080](http://localhost:8080)
 - phpMyAdmin: [http://localhost:8081](http://localhost:8081)
 
+## Iniciar sesion
+Busque el email de un usuario cualquiera en phpMyAdmin, la contraseña esta dada por el tipo del usuario:
+- `Administradores`: admin123
+- `Revisores`: revisor123
+- `Autores`: autor123
+
 ### Detencion
 Para detener los servicios
 ```bash
@@ -53,3 +59,6 @@ Para eliminar los datos de *mysql*
 ```bash
 sudo make clean-mysql
 ```
+
+# *¡Importante!*
+El contenedor de mysql se demora alrededor de 1min en estar listo, asi que no se asuste si abre phpMyAdmin o la aplicacion web y le llega un error de la base de datos o de Slim.
